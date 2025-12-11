@@ -1,0 +1,628 @@
+//utf-8
+
+Emacs 对 UTF-8 有非常完善的支持。以下是关于在 Emacs 中使用 UTF-8 的关键信息：
+
+检查当前编码
+
+• 查看缓冲区编码：C-h C f RET
+
+• 查看终端编码：M-x describe-terminal-coding-system
+
+设置 UTF-8 编码
+
+在配置文件（~/.emacs 或 ~/.emacs.d/init.el）中添加：
+
+;; 优先使用 UTF-8
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(setq locale-coding-system 'utf-8)
+;; 文件编码
+(setq default-buffer-file-coding-system 'utf-8)
+(modify-coding-system-alist 'file "\\.txt\\'" 'utf-8)
+
+
+常用命令
+
+• 查看/更改文件编码：C-x RET f
+
+• 查看/更改缓冲区编码：C-x RET c
+
+• 重新读取文件并转换编码：C-x RET r
+
+• 保存时指定编码：C-x C-m c 或 C-x RET c
+
+特殊场景
+
+• 网络传输：(setq coding-system-for-read 'utf-8)
+
+检测编码
+
+如果打开文件时出现乱码，Emacs 会自动检测编码。也可以手动指定：
+
+M-x revert-buffer-with-coding-system
+Emacs 26+ 版本默认使用 UTF-8，通常无需额外配置。如果遇到编码问题，检查上述设置即可。
+//font optimal
+Emacs Font Lock 性能优化与检查指南
+
+性能检查工具
+
+1. 基本性能分析
+
+;; 测量字体化时间
+(benchmark-run 10
+  (font-lock-fontify-buffer))
+
+;; 检查当前 font-lock 设置
+M-x describe-variable RET font-lock-keywords RET
+M-x describe-variable RET font-lock-keywords-alist RET
+
+
+2. 使用 profiler 分析
+
+;; 启动性能分析
+M-x profiler-start
+M-x profiler-start cpu
+M-x profiler-start memory
+
+;; 进行一些操作（如打开大文件、滚动等）
+;; 查看报告
+M-x profiler-report
+M-x profiler-stop
+
+
+3. font-benchmark 包
+
+;; 安装 font-benchmark
+(use-package font-benchmark
+  :ensure t
+  :config
+  (setq font-benchmark-directory "~/test-files"))
+
+
+性能优化技巧
+
+1. 调整 font-lock 级别
+
+;; 降低字体化级别提高性能
+(setq font-lock-maximum-decoration
+      '((c-mode     . 2)    ; 级别 1-4，1 最快
+        (c++-mode   . 2)
+        (java-mode  . 2)
+        (python-mode . 2)
+        (emacs-lisp-mode . 3)))
+
+;; 延迟字体化
+(setq font-lock-support-mode 'jit-lock-mode)
+(setq jit-lock-defer-time 0.05)  ; 延迟 0.05 秒
+(setq jit-lock-stealth-time 1)   ; 空闲 1 秒后字体化
+
+
+2. 简化正则表达式
+
+;; 避免过度复杂的正则表达式
+(defun my-simplify-font-lock ()
+  (font-lock-remove-keywords
+   nil
+   '(
+     ;; 移除复杂的匹配
+     ("\\(\\w+\\):\\(\\w+\\)" 1 'font-lock-type-face)
+     )))
+
+
+3. 使用 lazy 字体化
+
+;; 只字体化可见区域
+(setq font-lock-support-mode 'lazy-lock-mode)
+(setq lazy-lock-defer-time 0.2)
+(setq lazy-lock-defer-on-the-fly t)
+(setq lazy-lock-defer-on-scrolling t)
+
+
+选择性保留 font-lock
+
+1. 保留特定类型的字体化
+
+;; 只保留注释和字符串高亮
+(defun my-minimal-font-lock ()
+  (setq font-lock-defaults
+        '(nil
+          t
+          nil
+          nil
+          (font-lock-mark-block-function . mark-defun)
+          (font-lock-verbose . nil)))
+  (font-lock-add-keywords
+   nil
+   '((";.*" . font-lock-comment-face)
+     ("\".*\"" . font-lock-string-face)
+     ("\\_<\\(defun\\|defvar\\|setq\\)\\_>" 1 font-lock-keyword-face))))
+
+
+2. 按模式自定义
+
+;; Python 模式：只保留基本语法
+(add-hook 'python-mode-hook
+          (lambda ()
+            (setq font-lock-keywords
+                  python-font-lock-keywords)
+            (setq font-lock-keywords-only t)
+            ;; 移除 docstring 高亮以提高性能
+            (font-lock-remove-keywords
+             nil
+             '(("\\('''\\|\"\"\"\\).*\\1" 0 font-lock-doc-face t)))))
+
+;; Org 模式优化
+(add-hook 'org-mode-hook
+          (lambda ()
+            (setq org-fontify-done-headline nil)
+            (setq org-hide-emphasis-markers t)))
+
+
+3. 使用 font-lock-remove-keywords
+
+;; 移除不需要的字体化
+(defun my-remove-heavy-font-lock ()
+  (interactive)
+  ;; 移除复杂的高亮规则
+  (font-lock-remove-keywords
+   nil
+   '(
+     ;; 示例：移除复杂的正则匹配
+     ("\\<\\(FIXME\\|TODO\\|NOTE\\):" 1 font-lock-warning-face t)
+     ))
+  (font-lock-flush)
+  (font-lock-ensure))
+
+;; 绑定到快捷键
+(global-set-key (kbd "C-c f r") 'my-remove-heavy-font-lock)
+
+
+性能监控命令
+
+1. 检查当前字体化状态
+
+;; 显示当前缓冲区字体化信息
+(defun my-font-lock-info ()
+  (interactive)
+  (message "Font-lock keywords: %d"
+           (length font-lock-keywords))
+  (message "Font-lock mode: %s" font-lock-mode)
+  (message "JIT lock mode: %s" jit-lock-mode))
+
+;; 检查字体化缓存大小
+M-x describe-variable RET jit-lock-chunk-size RET
+
+
+2. 性能测试函数
+
+(defun benchmark-font-lock ()
+  "测试字体化性能"
+  (interactive)
+  (let ((start-time (current-time)))
+    (font-lock-fontify-buffer)
+    (message "字体化耗时: %.3f 秒"
+             (float-time (time-since start-time)))))
+
+(defun test-font-lock-performance ()
+  "运行一系列性能测试"
+  (interactive)
+  ;; 测试 1: 基本字体化
+  (message "=== 测试 1: 基本字体化 ===")
+  (benchmark-font-lock)
+  
+  ;; 测试 2: 禁用字体化
+  (message "\n=== 测试 2: 禁用字体化 ===")
+  (let ((font-lock-mode nil))
+    (benchmark-font-lock))
+  
+  ;; 测试 3: 不同级别
+  (message "\n=== 测试 3: 不同装饰级别 ===")
+  (dotimes (level 4)
+    (let ((font-lock-maximum-decoration level))
+      (message "级别 %d:" level)
+      (benchmark-font-lock))))
+
+
+实用配置建议
+
+1. 针对大文件的优化
+
+;; 大文件优化
+(defun my-large-file-hook ()
+  (when (> (buffer-size) 1000000)  ; 1MB 以上
+    ;; 禁用部分高亮
+    (setq font-lock-maximum-decoration 1)
+    ;; 增大延迟
+    (setq jit-lock-defer-time 0.5)
+    ;; 禁用自动换行
+    (setq truncate-lines t)
+    ;; 减少语法检查
+    (setq flycheck-check-syntax-automatically nil)))
+
+(add-hook 'find-file-hook 'my-large-file-hook)
+
+
+2. 模式特定的优化
+
+;; 为不同编程语言设置不同的优化策略
+(setq my-font-lock-optimizations
+      '((c-mode . (:level 2 :delay 0.1))
+        (python-mode . (:level 3 :delay 0.05))
+        (web-mode . (:level 2 :delay 0.2))
+        (emacs-lisp-mode . (:level 4 :delay 0.01))))
+
+(defun apply-mode-optimizations ()
+  (let* ((mode major-mode)
+         (settings (cdr (assoc mode my-font-lock-optimizations))))
+    (when settings
+      (setq font-lock-maximum-decoration (plist-get settings :level))
+      (setq jit-lock-defer-time (plist-get settings :delay)))))
+
+(add-hook 'prog-mode-hook 'apply-mode-optimizations)
+
+
+3. 动态调整策略
+
+;; 根据系统负载动态调整
+(defun dynamic-font-lock-adjust ()
+  (cond ((> (car (load-average)) 2.0)
+         ;; 高负载时降低质量
+         (setq jit-lock-defer-time 0.3)
+         (setq font-lock-maximum-decoration 1))
+        ((< (car (load-average)) 0.5)
+         ;; 低负载时提高质量
+         (setq jit-lock-defer-time 0.01)
+         (setq font-lock-maximum-decoration 3))
+        (t
+         ;; 中等负载
+         (setq jit-lock-defer-time 0.1)
+         (setq font-lock-maximum-decoration 2))))
+
+(run-with-idle-timer 10 t 'dynamic-font-lock-adjust)
+
+
+调试工具
+
+1. 字体化调试命令
+
+;; 查看哪些文本被字体化
+M-x font-lock-debug-fontify
+
+;; 重新字体化整个缓冲区
+M-x font-lock-flush
+M-x font-lock-ensure
+
+;; 查看 font-lock 状态
+M-x describe-font-lock
+
+
+2. 内存使用检查
+
+;; 查看内存使用
+M-x memory-report
+
+;; 检查缓冲区属性
+M-x list-text-properties
+
+
+最佳实践总结
+
+1. 分级优化：根据文件大小和系统负载动态调整
+
+2. 延迟字体化：使用 jit-lock-mode 和适当的延迟时间
+
+3. 简化规则：移除不需要的复杂匹配规则
+
+4. 按需启用：大文件时降低字体化级别
+
+5. 定期监控：使用性能分析工具定期检查
+
+通过合理配置，可以在保持语法高亮的同时获得良好的编辑性能。
+逐行解释代码
+
+;; 第1行：设置 font-lock 的支持模式为 lazy-lock-mode
+(setq font-lock-support-mode 'lazy-lock-mode)
+
+
+解释：
+
+• setq：设置变量值的函数
+
+• font-lock-support-mode：控制 Emacs 如何管理字体化（语法高亮）的变量
+
+• 'lazy-lock-mode：使用 lazy lock 模式
+
+• 作用：告诉 Emacs 使用惰性字体化策略，即只在需要时才进行语法高亮，而不是立即对整个缓冲区进行高亮，这对大文件性能有帮助
+
+;; 第2行：设置 lazy lock 的延迟时间为 0.2 秒
+(setq lazy-lock-defer-time 0.2)
+
+
+解释：
+
+• lazy-lock-defer-time：延迟字体化的时间（秒）
+
+• 0.2：200 毫秒
+
+• 作用：用户停止操作 0.2 秒后才开始字体化。例如，当您快速输入时，Emacs 会等待您暂停 0.2 秒后才进行语法高亮
+
+;; 第3行：开启实时输入的延迟字体化
+(setq lazy-lock-defer-on-the-fly t)
+
+
+解释：
+
+• lazy-lock-defer-on-the-fly：控制是否在用户输入时也使用延迟字体化
+
+• t：true，启用
+
+• 作用：即使在用户输入过程中也使用延迟策略。如果没有这个设置，可能在输入每个字符时都立即进行字体化
+
+;; 第4行：开启滚动时的延迟字体化
+(setq lazy-lock-defer-on-scrolling t)
+
+
+解释：
+
+• lazy-lock-defer-on-scrolling：控制是否在滚动时也使用延迟字体化
+
+• t：true，启用
+
+• 作用：在滚动时延迟字体化，直到停止滚动。这对于流畅滚动大型文件特别重要
+
+;; 第5-11行：定义一个简化字体化的函数
+(defun my-simplify-font-look ()
+  (font-lock-remove-keywords
+   nil
+   '(
+     ;; 移除复杂的匹配
+     ("\\(\\w+\\):\\(\\w+\\)" 1 'font-lock-type-face)
+     )))
+
+
+详细解释：
+
+;; 第5行：定义函数 my-simplify-font-look
+(defun my-simplify-font-look ()
+
+
+• defun：定义函数的关键字
+
+• my-simplify-font-look：函数名
+
+• ()：无参数
+
+;; 第6行：调用 font-lock-remove-keywords 函数
+  (font-lock-remove-keywords
+
+
+• font-lock-remove-keywords：Emacs 内置函数，用于从字体化规则中移除特定的关键字匹配规则
+
+;; 第7行：第一个参数 nil 表示当前缓冲区
+   nil
+
+
+• nil：表示操作应用于当前缓冲区
+
+• 如果是模式名称（如 'python-mode），则应用于该模式的所有缓冲区
+
+;; 第8-12行：要移除的字体化规则列表
+   '(
+     ;; 移除复杂的匹配
+     ("\\(\\w+\\):\\(\\w+\\)" 1 'font-lock-type-face)
+     )))
+
+
+规则解释：
+
+;; 第10行：一个字体化规则
+("\\(\\w+\\):\\(\\w+\\)" 1 'font-lock-type-face)
+
+
+• 正则表达式："\\(\\w+\\):\\(\\w+\\)"
+
+  ◦ 匹配格式：单词:单词
+
+  ◦ 例如：foo:bar、variable:value
+
+• 捕获组 1：第一个 \\(\\w+\\) 部分
+
+• 高亮面：'font-lock-type-face（类型的高亮样式）
+
+• 作用：原本会将冒号前的单词高亮为类型（如变量类型）
+
+整体功能总结
+
+这段代码做了两件事：
+
+1. 性能优化配置（前4行）
+
+• 启用 lazy-lock 惰性字体化
+
+• 设置 200 毫秒的延迟
+
+• 开启输入和滚动时的延迟
+
+• 目标：提高编辑大文件时的响应速度，避免每次按键都重新高亮整个文档
+
+2. 简化字体化规则（函数定义）
+
+• 定义了一个函数，从当前缓冲区移除特定的字体化规则
+
+• 移除的规则是匹配 单词:单词 格式并将其高亮为类型
+
+• 目标：移除可能影响性能的复杂正则表达式匹配
+
+使用示例
+
+;; 应用简化字体化
+(my-simplify-font-look)
+
+;; 或者绑定到钩子
+(add-hook 'python-mode-hook 'my-simplify-font-look)
+(add-hook 'js-mode-hook 'my-simplify-font-look)
+
+
+注意
+
+1. 这个函数只移除特定的字体化规则，不是全部规则
+
+2. 移除后，类似 foo:bar 的文本将不再被高亮为类型
+
+3. 如果要移除多个规则，可以在列表中添加更多：
+
+(defun my-simplify-font-look ()
+  (font-lock-remove-keywords
+   nil
+   '(
+     ;; 移除多个复杂规则
+     ("\\(\\w+\\):\\(\\w+\\)" 1 'font-lock-type-face)
+     ("\\[\\(.*\\)\\]" 1 'font-lock-string-face)  ; 移除方括号内高亮
+     ("#.*" 0 'font-lock-comment-face)            ; 移除 # 注释高亮
+     )))
+
+indent code
+
+在 Emacs 中，代码块左侧的竖线（缩进指南）可以通过多种方式实现。以下是几种常见方法：
+
+1. highlight-indent-guides 包（推荐）
+
+这是一个流行的缩进指南插件。
+
+;; 安装
+(use-package highlight-indent-guides
+  :ensure t
+  :hook (prog-mode . highlight-indent-guides-mode)
+  :config
+  (setq highlight-indent-guides-method 'character)  ; 或 'column, 'fill
+  (setq highlight-indent-guides-character ?│)      ; 使用竖线字符
+  (setq highlight-indent-guides-auto-enabled t)
+  (setq highlight-indent-guides-responsive 'top))  ; 只在顶部显示
+
+
+2. indent-guide 包
+
+另一个选择：
+
+(use-package indent-guide
+  :ensure t
+  :hook (prog-mode . indent-guide-mode)
+  :config
+  (setq indent-guide-char "│")
+  (setq indent-guide-recursive t))
+
+
+3. Emacs 内置的 display-fill-column-indicator（Emacs 27+）
+
+在指定列显示竖线（如 80 列）：
+
+;; 显示 80 列边界线
+(setq-default display-fill-column-indicator-column 80)
+(global-display-fill-column-indicator-mode 1)
+
+;; 自定义颜色
+(set-face-foreground 'fill-column-indicator "#3f3f3f")
+
+
+4. 通过 faces 自定义样式
+
+自定义缩进指南外观：
+
+;; highlight-indent-guides 的自定义
+(set-face-background 'highlight-indent-guides-odd-face "gray20")
+(set-face-background 'highlight-indent-guides-even-face "gray15")
+(set-face-foreground 'highlight-indent-guides-character-face "gray40")
+
+;; 修改竖线字符
+(setq highlight-indent-guides-character ?┃)  ; 更粗的竖线
+;; 或
+(setq highlight-indent-guides-character ?▏)  ; 细竖线
+
+
+5. 只针对特定模式
+
+;; 只在特定模式启用
+(add-hook 'python-mode-hook 'highlight-indent-guides-mode)
+(add-hook 'js-mode-hook 'highlight-indent-guides-mode)
+(add-hook 'emacs-lisp-mode-hook 'highlight-indent-guides-mode)
+
+
+6. 简单的手动实现
+
+如果不想安装包，可以用简单的函数：
+
+;; 在左侧边缘显示竖线
+(setq indicate-empty-lines t)
+(setq indicate-buffer-boundaries 'left)
+
+;; 显示行号时添加分隔线
+(setq linum-format "%4d │ ")
+
+
+常用字符选项
+
+可用的竖线字符：
+
+• ?│ - 细竖线
+
+• ?┃ - 粗竖线
+
+• ?┆ - 虚线竖线
+
+• ?┊ - 更细的点线
+
+• ?▏ - 1/8 宽竖线
+
+• ?| - 管道符
+
+我的推荐配置
+
+(use-package highlight-indent-guides
+  :ensure t
+  :hook ((prog-mode yaml-mode) . highlight-indent-guides-mode)
+  :config
+  (setq highlight-indent-guides-method 'character)
+  (setq highlight-indent-guides-character ?┆)  ; 虚线竖线
+  (setq highlight-indent-guides-auto-character-face-perc 10)  ; 透明度
+  (setq highlight-indent-guides-responsive 'top))
+
+
+选择哪种方法取决于你的需求：
+
+• highlight-indent-guides：功能最全，支持多种样式
+
+• indent-guide：轻量级选择
+
+• 内置功能：无需安装额外包
+
+//indent
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;; 方法1：设置制表符宽度为 8
+(setq-default tab-width 8) ; 制表符显示宽度
+;; 方法2：缩进宽度设置为 8 tab is spc
+
+(setq-default standard-indent 8)
+(setq-default indent-tabs-mode nil)  ; 使用空格缩进
+
+;;nil or t tab show 8 spc
+;; 确保 Tab 键插入制表符，而不是空格
+;;(setq-default indent-tabs-mode t)
+
+
+
+

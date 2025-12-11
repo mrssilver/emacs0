@@ -1,0 +1,41 @@
+;; This buffer is for text that is not saved, and for Lisp evaluation.
+;; To create a file, visit it with C-x C-f and enter text in its buffer.
+
+ffmpeg -i input.mp4 -c:v h264 -b:v 3000k -c:a aac -b:a 128k output.mp4
+
+
+-r 20
+
+zhenlv
+
+使用ffmpeg工具修改视频文件的帧率命令如下所示:
+
+ffmpeg -i input -r fps output
+
+
+-crf #压缩质量，0至20，数字越大，质量越差，0为无损。貌似设置了此项则视频比特率设置无效
+
+-ar #音频采样频率
+
+- 在此命令中，`-i input.mp4` 指定要压缩的视频文件，`-c:v h264` 指定视频编解码器为 H.264，`-b:v 3000k` 指定视频比特率为 3 Mbps，`-c:a aac` 指定音频编解码器为 AAC，`-b:a 128k` 指定音频比特率为 128 kbps，`output.mp4` 指定压缩后的视频文件。
+
+
+
+
+ffmpeg -i Desktop/input.mp4 -fs 10MB Desktop/output.mp4
+
+-fs 10 : 表示文件大小最大值为10MB
+
+fmpeg -i input.mp4 -ss 00:01:30 -t 00:05:00 output.mp4
+这里 -i input.mp4 表示输入的视频文件，-ss 00:01:30 表示从01:30开始，-t 00:05:00 表示时长为05:00。
+请确保你的输入时间格式是 HH:MM:SS，并且保证 -ss 位置在 -i 之后，因为 -ss 需要参照输入文件的时间
+
+
+--preset的参数主要调节编码速度和质量的平衡，有ultrafast、superfast、veryfast、faster、fast、medium、slow、slower、veryslow、placebo这10个选项，从快到慢。
+
+
+
+
+ffmpeg -i 'p - 7.mp4' -c:v h264 -filter:v crop=888:1720:0:200 -preset medium -c:a aac -b:a 128k 15.mp4
+
+ffmpeg -i '1.MP4' -c:v h264 -filter:v crop=592:1050:0:80 -preset medium -c:a aac -b:a 128k 15.mp4
