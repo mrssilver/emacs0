@@ -1,0 +1,579 @@
+;; 在Emacs配置文件中添加
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+;; 安装依赖包
+(package-install 'dash)    ; 函数式编程工具
+(package-install 's)       ; 字符串操作
+(package-install 'f)       ; 文件操作
+(package-install 'ht)      ; 哈希表
+
+
+2. 加载文件树浏览器
+
+;; 将文件保存为 file-tree-browser.el
+;; 然后在配置文件中加载
+(add-to-list 'load-path "~/.emacs.d/lisp/")
+(require 'file-tree-browser)
+
+
+3. 基本使用命令
+
+;; 交互式命令
+M-x file-tree-browse                      ; 浏览指定目录
+M-x file-tree-browse-current-directory    ; 浏览当前目录
+M-x file-tree-browse-current-file         ; 浏览当前文件所在目录
+M-x file-tree-browse-home                 ; 浏览家目录
+M-x file-tree-browse-root                 ; 浏览根目录
+M-x file-tree-quick-browse                ; 快速浏览（显示详细信息）
+M-x file-tree-browse-with-config          ; 使用自定义配置浏览
+
+;; 缓冲区操作（在文件树缓冲区中）
+RET     ; 打开文件/目录
+o       ; 在其他窗口打开
+d       ; 删除文件
+c       ; 复制文件
+r       ; 重命名文件
+m       ; 修改权限
+q       ; 退出
+g       ; 刷新
+
+
+4. 自定义配置
+
+;; 设置默认配置
+(setq file-tree-show-size t)      ; 显示文件大小
+(setq file-tree-show-time t)      ; 显示修改时间
+(setq file-tree-show-mode t)      ; 显示文件权限
+(setq file-tree-max-depth 10)     ; 限制深度
+(setq file-tree-max-nodes 200)    ; 增加节点限制
+(setq file-tree-color t)          ; 启用颜色
+(setq file-tree-verbose t)        ; 显示详细信息
+
+;; 自定义忽略列表
+(setq file-tree-ignore-list
+      '(".git" ".svn" ".DS_Store" "node_modules" "__pycache__"
+        "*.pyc" "*.elc" "*.class" "*.o" "*.so"))
+
+;; 自定义颜色
+(setq file-tree-colors
+      '((directory . "DeepSkyBlue")
+        (executable . "Green")
+        (symlink . "Cyan")
+        (elisp . "Magenta")
+        (permission-denied . "Red")
+        (warning . "Orange")
+        (error . "Red")
+        (info . "SkyBlue")
+        (success . "LimeGreen")))
+
+;; 自定义图标
+(setq file-tree-icons
+      '((directory . "📁 ")
+        (file . "📄 ")
+        (symlink . "🔗 ")
+        (executable . "⚡ ")
+        (elisp . "λ ")
+        (permission-denied . "🔒 ")
+        (warning . "⚠️ ")
+        (error . "❌ ")
+        (info . "💡 ")
+        (success . "✅ ")))
+
+
+5. 键盘绑定
+
+;; 全局快捷键
+(global-set-key (kbd "C-c t") 'file-tree-browse-current-directory)
+(global-set-key (kbd "C-c f") 'file-tree-browse-current-file)
+(global-set-key (kbd "C-c T") 'file-tree)
+
+;; Dired集成
+(define-key dired-mode-map (kbd "C-c t") 'file-tree-browse-dired)
+
+
+6. 编程接口
+
+;; 以编程方式使用
+(let* ((config (file-tree-config-create))
+       (tree-result (file-tree-build "~/projects" config)))
+  ;; tree-result 包含 (根节点 统计信息 错误列表)
+  (file-tree-print tree-result config))
+
+;; 导出为JSON
+(let ((config (file-tree-config-create)))
+  (setf (file-tree-config-json-output config) t)
+  (setf (file-tree-config-output-file config) "tree.json")
+  (file-tree-browse "." config))
+
+;; 导出为HTML
+(let ((config (file-tree-config-create)))
+  (setf (file-tree-config-html config) t)
+  (setf (file-tree-config-output-file config) "tree.html")
+  (file-tree-browse "." config))
+
+
+7. 使用示例
+
+;; 示例1：详细浏览当前项目
+(let ((config (file-tree-config-create)))
+  (setf (file-tree-config-show-size config) t)
+  (setf (file-tree-config-show-time config) t)
+  (setf (file-tree-config-show-mode config) t)
+  (setf (file-tree-config-show-owner config) t)
+  (setf (file-tree-config-show-group config) t)
+  (setf (file-tree-config-stats config) t)
+  (file-tree-browse "." config))
+
+;; 示例2：只显示Elisp文件
+(let ((config (file-tree-config-create)))
+  (setf (file-tree-config-pattern config) "*.el")
+  (setf (file-tree-config-elisp-parse config) t)
+  (file-tree-browse "~/.emacs.d" config))
+
+;; 示例3：限制深度和节点数
+(let ((config (file-tree-config-create)))
+  (setf (file-tree-config-max-depth config) 3)
+  (setf (file-tree-config-max-nodes config) 50)
+  (setf (file-tree-config-show-hidden config) t)
+  (file-tree-browse "/usr" config))
+
+;; 示例4：排除特定目录
+(let ((config (file-tree-config-create)))
+  (setf (file-tree-config-exclude-dirs config) '("node_modules" ".git" ".cache"))
+  (setf (file-tree-config-exclude-files config) '("*.log" "
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  File Tree Browser - 强大的文件树浏览器
+
+[图片](https://img.shields.io/badge/version-1.0.0-blue.svg)
+
+[图片](https://img.shields.io/badge/emacs-26.1+-red.svg)
+
+[图片](https://img.shields.io/badge/license-GPL%203.0-green.svg)
+
+一个功能强大的Emacs文件树浏览器，支持权限检查、Elisp文件解析、多种输出格式和交互式浏览体验。
+
+✨ 特性
+
+• 🌳 树形结构显示 - 直观的ASCII艺术树形结构
+
+• 🔐 权限感知 - 自动检测权限问题并提供修复建议
+
+• λ Elisp解析 - 智能解析.el文件内容
+
+• 🎨 彩色输出 - 支持彩色输出，不同类型文件使用不同颜色
+
+• 📊 详细统计 - 提供详细的文件统计信息
+
+• 🔧 多种格式 - 支持文本、JSON、XML、Markdown、HTML输出
+
+• ⚡ 高性能 - 支持并发处理和进度显示
+
+• 🛡️ 安全模式 - 防止意外操作
+
+• 🔌 无缝集成 - 与Dired、Projectile等集成
+
+📦 安装
+
+1. 安装依赖
+
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+;; 安装依赖包
+(package-install 'dash)    ; 函数式编程工具
+(package-install 's)       ; 字符串操作
+(package-install 'f)       ; 文件操作
+(package-install 'ht)      ; 哈希表
+
+
+2. 下载和加载
+
+;; 下载 file-tree-browser.el
+(add-to-list 'load-path "~/.emacs.d/lisp/")
+(require 'file-tree-browser)
+
+
+3. 自动加载（可选）
+
+;; 添加到自动加载
+(autoload 'file-tree-browse "file-tree-browser" "浏览文件树" t)
+(autoload 'file-tree-browse-current-directory "file-tree-browser" "浏览当前目录" t)
+
+
+🚀 快速开始
+
+基本使用
+
+M-x file-tree-browse                      ; 浏览指定目录
+M-x file-tree-browse-current-directory    ; 浏览当前目录
+M-x file-tree-browse-current-file         ; 浏览当前文件所在目录
+M-x file-tree-browse-home                 ; 浏览家目录
+M-x file-tree-browse-root                 ; 浏览根目录
+M-x file-tree-quick-browse                ; 快速浏览
+
+
+键盘绑定
+
+建议在配置文件中添加以下快捷键：
+
+(global-set-key (kbd "C-c t") 'file-tree-browse-current-directory)
+(global-set-key (kbd "C-c f") 'file-tree-browse-current-file)
+(global-set-key (kbd "C-c T") 'file-tree)
+
+
+📋 使用示例
+
+示例1：查看当前目录
+
+;; 使用默认配置查看当前目录
+M-x file-tree-browse-current-directory
+
+
+示例2：详细查看项目目录
+
+;; 自定义配置查看项目
+(let ((config (file-tree-config-create)))
+  (setf (file-tree-config-show-size config) t)
+  (setf (file-tree-config-show-time config) t)
+  (setf (file-tree-config-show-mode config) t)
+  (setf (file-tree-config-show-owner config) t)
+  (setf (file-tree-config-show-group config) t)
+  (setf (file-tree-config-stats config) t)
+  (file-tree-browse "~/projects" config))
+
+
+示例3：只显示Elisp文件
+
+;; 只显示和解析Elisp文件
+(let ((config (file-tree-config-create)))
+  (setf (file-tree-config-pattern config) "*.el")
+  (setf (file-tree-config-elisp-parse config) t)
+  (file-tree-browse "~/.emacs.d" config))
+
+
+示例4：导出为JSON
+
+;; 导出当前目录树为JSON
+(let ((config (file-tree-config-create)))
+  (setf (file-tree-config-json-output config) t)
+  (setf (file-tree-config-output-file config) "tree.json")
+  (file-tree-browse "." config))
+
+
+示例5：导出为HTML
+
+;; 导出为HTML报告
+(let ((config (file-tree-config-create)))
+  (setf (file-tree-config-html config) t)
+  (setf (file-tree-config-output-file config) "tree.html")
+  (file-tree-browse "/var/log" config))
+
+
+⚙️ 配置选项
+
+主要配置变量
+
+变量	默认值	描述
+file-tree-max-depth	20	最大遍历深度
+file-tree-max-nodes	100	最大节点数
+file-tree-show-hidden	nil	是否显示隐藏文件
+file-tree-show-size	nil	是否显示文件大小
+file-tree-show-time	nil	是否显示修改时间
+file-tree-show-mode	nil	是否显示文件权限
+file-tree-show-owner	nil	是否显示所有者
+file-tree-show-group	nil	是否显示组
+file-tree-color	t	是否使用颜色输出
+file-tree-elisp-parse	t	是否解析Elisp文件
+file-tree-verbose	nil	详细模式
+file-tree-stats	nil	显示统计信息
+file-tree-safe-mode	t	安全模式
+file-tree-interactive	nil	交互模式
+
+自定义配置示例
+
+;; 在Emacs配置文件中设置默认值
+(setq file-tree-show-size t)      ; 总是显示文件大小
+(setq file-tree-show-time t)      ; 总是显示修改时间
+(setq file-tree-show-mode t)      ; 总是显示文件权限
+(setq file-tree-max-depth 10)     ; 限制深度
+(setq file-tree-max-nodes 200)    ; 增加节点限制
+(setq file-tree-color t)          ; 启用颜色
+(setq file-tree-verbose t)        ; 显示详细信息
+
+;; 自定义忽略列表
+(setq file-tree-ignore-list
+      '(".git" ".svn" ".DS_Store" "node_modules" "__pycache__"
+        "*.pyc" "*.elc" "*.class" "*.o" "*.so"))
+
+;; 自定义颜色
+(setq file-tree-colors
+      '((directory . "DeepSkyBlue")
+        (executable . "Green")
+        (symlink . "Cyan")
+        (elisp . "Magenta")
+        (permission-denied . "Red")
+        (warning . "Orange")
+        (error . "Red")
+        (info . "SkyBlue")
+        (success . "LimeGreen")))
+
+;; 自定义图标
+(setq file-tree-icons
+      '((directory . "📁 ")
+        (file . "📄 ")
+        (symlink . "🔗 ")
+        (executable . "⚡ ")
+        (elisp . "λ ")
+        (permission-denied . "🔒 ")
+        (warning . "⚠️ ")
+        (error . "❌ ")
+        (info . "💡 ")
+        (success . "✅ ")))
+
+
+🔧 高级功能
+
+1. 权限检查和建议
+
+当遇到权限问题时，File Tree Browser会：
+
+• 显示黄色警告图标
+
+• 提供具体的错误信息
+
+• 给出修复建议
+
+• 在详细模式下显示修复命令
+
+2. Elisp文件解析
+
+对于.el文件，工具会：
+
+• 解析文件内容
+
+• 识别函数定义
+
+• 以树形结构显示代码结构
+
+• 支持截断长行
+
+3. 多格式输出
+
+支持多种输出格式：
+
+• 文本格式：默认的ASCII树形结构
+
+• JSON格式：结构化数据，适合程序处理
+
+• XML格式：标准XML格式
+
+• Markdown格式：适合文档编写
+
+• HTML格式：可嵌入网页的报告
+
+4. 进度显示
+
+在扫描大型目录时显示进度：
+
+• 当前处理的文件
+
+• 已处理/总文件数
+
+• 进度百分比
+
+• 估计剩余时间
+
+5. 统计信息
+
+详细的统计信息包括：
+
+• 文件类型分布
+
+• 扩展名统计
+
+• 深度分布
+
+• 大小统计
+
+• 权限问题统计
+
+🎮 交互模式
+
+在文件树缓冲区中，可以使用以下快捷键：
+
+按键	功能
+RET	打开文件/目录
+o	在其他窗口打开
+d	删除文件
+c	复制文件
+r	重命名文件
+m	修改权限
+q	退出
+g	刷新
+n	下一行
+p	上一行
+s	搜索
+F	过滤
+S	排序
+C	配置
+H	帮助
+
+🔌 集成
+
+与Dired集成
+
+;; 在Dired模式中添加绑定
+(define-key dired-mode-map (kbd "C-c t") 'file-tree-browse-dired)
+(define-key dired-mode-map (kbd "C-c f") 'file-tree-browse-dired-file)
+
+
+与Projectile集成
+
+;; 如果安装了Projectile
+(when (fboundp 'projectile-project-root)
+  (define-key projectile-mode-map (kbd "C-c p t") 'file-tree-browse-project))
+
+
+📁 目录结构示例
+
+运行 M-x file-tree-browse ~/.emacs.d 的输出示例：
+
+📁 路径: /home/user/.emacs.d
+📊 统计: 8 目录, 23 文件, 31 节点
+💾 总大小: 4.2MB
+⏱️  耗时: 0.2s
+👤 用户: user
+
+└── λ .emacs.d
+    ├── 📁 lisp
+    │   ├── λ init.el
+    │   ├── λ config.el
+    │   └── λ keybindings.el
+    ├── 📁 themes
+    │   ├── 📁 solarized
+    │   └── 📁 gruvbox
+    ├── 📁 snippets
+    │   └── 📁 yasnippet
+    ├── 📁 backup
+    └── 📄 README.org
+
+
+🐛 故障排除
+
+常见问题
+
+1. 权限问题
+
+  ◦ 确保有读取目录的权限
+
+  ◦ 如果是系统目录，可能需要使用sudo
+
+  ◦ 检查SELinux状态
+
+2. 性能问题
+
+  ◦ 减少 file-tree-max-depth
+
+  ◦ 减少 file-tree-max-nodes
+
+  ◦ 使用 file-tree-skip-large 跳过大型文件
+
+3. 颜色不显示
+
+  ◦ 确保终端支持颜色
+
+  ◦ 检查 file-tree-color 设置
+
+  ◦ 确认 (display-color-p) 返回t
+
+调试模式
+
+启用调试模式获取更多信息：
+
+(setq file-tree-debug t)
+
+
+🤝 贡献
+
+欢迎贡献！请遵循以下步骤：
+
+1. Fork 仓库
+
+2. 创建功能分支 (git checkout -b feature/AmazingFeature)
+
+3. 提交更改 (git commit -m 'Add some AmazingFeature')
+
+4. 推送到分支 (git push origin feature/AmazingFeature)
+
+5. 打开 Pull Request
+
+开发指南
+
+1. 代码风格遵循Emacs Lisp标准
+
+2. 添加适当的文档字符串
+
+3. 为新功能添加测试
+
+4. 更新README文档
+
+📄 许可证
+
+本项目采用GNU General Public License v3.0许可证 - 查看LICENSE(LICENSE)文件了解详情。
+
+📞 联系方式
+
+• 作者：Your Name
+
+• 邮箱：your-email@example.com
+
+• 项目地址：https://github.com/yourname/file-tree-browser(https://github.com/yourname/file-tree-browser)
+
+🙏 致谢
+
+• 感谢所有贡献者
+
+• 感谢Emacs社区
+
+• 使用以下优秀库：
+
+  ◦ dash.el(https://github.com/magnars/dash.el)
+
+  ◦ s.el(https://github.com/magnars/s.el)
+
+  ◦ f.el(https://github.com/rejeep/f.el)
+
+  ◦ ht.el(https://github.com/Wilfred/ht.el)
+
+📈 更新日志
+
+v1.0.0 (2024-01-01)
+
+• 初始版本发布
+
+• 支持基本文件树浏览
+
+• 权限检查功能
+
+• Elisp文件解析
+
+• 多种输出格式
+
+• 详细统计信息
+
+
+------
+
+享受文件浏览的乐趣！ 🎉
