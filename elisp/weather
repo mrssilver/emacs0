@@ -1,0 +1,176 @@
+
+
+1. 预设选项
+
+系统提供三种预设选项：
+
+选项a: 3天 WeatherAPI (C-c w a)
+
+• API提供商: WeatherAPI.com
+
+• 预报天数: 3天
+
+• 需要API密钥
+
+• 包含详细的天气信息
+
+选项b: 5天 OpenWeather (C-c w b)
+
+• API提供商: OpenWeather
+
+• 预报天数: 5天
+
+• 需要API密钥
+
+• 包含丰富的天气数据
+
+选项c: 5天 Open-Meteo (默认) (C-c w c)
+
+• API提供商: Open-Meteo
+
+• 预报天数: 5天
+
+• 无需API密钥
+
+• 免费且无限制
+
+2. 快速开始
+
+显示选项菜单 (C-c w o)
+
+M-x weather-show-options-menu
+
+
+显示选项菜单，可选择预设选项或自定义设置。
+
+快速显示天气 (C-c w w)
+
+M-x weather-quick-show
+
+
+使用当前设置显示所有城市的天气预报。
+
+3. API密钥设置
+
+WeatherAPI密钥
+
+M-x weather-set-weatherapi-key
+
+
+输入从 https://www.weatherapi.com(https://www.weatherapi.com) 获取的API密钥。
+
+OpenWeather密钥
+
+M-x weather-set-openweather-key
+
+
+输入从 https://openweathermap.org/api(https://openweathermap.org/api) 获取的API密钥。
+
+4. 选项菜单使用
+
+在选项菜单中可以使用以下快捷键：
+
+• 1 - 选择选项a: 3天 WeatherAPI
+
+• 2 - 选择选项b: 5天 OpenWeather
+
+• 3 - 选择选项c: 5天 Open-Meteo
+
+• p - 手动选择API提供商
+
+• d - 手动选择预报天数
+
+• u - 切换温度单位
+
+• i - 切换图标显示
+
+• s - 显示天气
+
+• q - 退出菜单
+
+5. 异步获取特性
+
+• 非阻塞界面：获取数据时Emacs不会卡住
+
+• 进度显示：显示已获取城市数量
+
+• 自动完成：所有数据获取完成后自动显示
+
+• 错误处理：单个城市失败不影响其他城市
+
+6. 显示格式
+
+表格格式：
+
+| 城市 | 日期       | 天气 | 最高温 | 最低温 | 降水量 | 降雨概率 |
+|------|------------|------|--------|--------|---------|----------|
+| 北京 | 2024-01-15 | ☀️  | 5.2°C  | -3.1°C | 0.00 mm | 10%      |
+| 北京 | 2024-01-16 | 🌧️  | 3.8°C  | -4.5°C | 2.50 mm | 45%      |
+
+
+降雨概率着色：
+
+• 降雨概率 < 30%：正常显示
+
+• 降雨概率 ≥ 30%：红色加粗显示
+
+7. API特性对比
+
+特性	Open-Meteo	OpenWeather	WeatherAPI
+免费	✅ 是	⚠️ 有限制	⚠️ 有限制
+API密钥	❌ 不需要	✅ 需要	✅ 需要
+预报天数	✅ 3或5天	⚠️ 只能5天	✅ 3或5天
+天气图标	✅ 支持	✅ 支持	✅ 支持
+异步获取	✅ 支持	✅ 支持	✅ 支持
+数据更新	实时	每3小时	实时
+
+8. 故障排除
+
+API密钥问题
+
+;; 检查当前API提供商
+(message "当前API提供商: %s" weather-api-provider)
+
+;; 检查密钥设置
+(if (eq weather-api-provider 'openweather)
+    (message "OpenWeather密钥: %s" (if (string-empty-p openweather-api-key) "未设置" "已设置"))
+  (if (eq weather-api-provider 'weatherapi)
+      (message "WeatherAPI密钥: %s" (if (string-empty-p weatherapi-api-key) "未设置" "已设置"))
+    (message "Open-Meteo无需密钥")))
+
+
+网络连接问题
+
+;; 检查API可用性
+M-x weather-check-api-availability
+
+
+异步获取失败
+
+;; 查看消息缓冲区
+*Messages* 缓冲区
+;; 或
+C-h e
+
+
+9. 自定义配置
+
+修改城市列表
+
+(setq weather-cities
+      '(("纽约"    "-0.1278")
+        ("东京"     "35.6762"   "139.6503")
+        ("巴黎"     "48.8566"   "2.3522")
+        ("悉尼"     "-33.8688"  "151.2093")))
+
+
+永久设置选项
+
+;; 在配置文件中设置默认选项
+(setq weather-api-provider 'open-meteo)  ; 默认使用Open-Meteo
+(setq weather-forecast-days 5)           ; 默认5天预报
+(setq weather-units "metric")            ; 默认摄氏度
+(setq weather-show-icons t)              ; 默认显示图标
+(setq openweather-api-key "your-key")    ; 设置OpenWeather密钥
+(setq weatherapi-api-key "your-key")     ; 设置WeatherAPI密钥
+utf-8天气系统提供了三种完整的选项，支持异步获取
