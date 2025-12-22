@@ -206,6 +206,20 @@
                       :background (gold-color :night-bg-alt)
                       :underline (gold-color :blood-red)))
 
+(use-package isearch
+  :ensure nil
+  :bind
+  (("C-s" . isearch-forward-regexp)
+   ("C-r" . isearch-backward-regexp)
+   ("C-M-s" . isearch-forward)
+   ("C-M-r" . isearch-backward)
+   ("M-%" . query-replace-regexp)
+   ("C-M-%" . query-replace))
+  :config
+  ;; 在搜索模式中
+  (define-key isearch-mode-map (kbd "M-%") 'isearch-query-replace-regexp)
+  (define-key isearch-mode-map (kbd "C-%") 'isearch-query-replace)
+  (setq isearch-wrap t))
 ;;; 8. 行号设置
 (use-package display-line-numbers
   :hook ((prog-mode text-mode conf-mode) . display-line-numbers-mode)
@@ -393,6 +407,11 @@
                       :foreground (gold-color :gold-secondary)
                       :background (gold-color :org-code-bg))
   
+  :custom
+  (org-src-block-faces '((nil . (:background "#e0f2e0" 
+                          :extend t 
+                          :box (:line-width 1 :color "#c0e0c0" :style rounded)
+                          :padding "0.5em"))))
   :bind
   (:map org-mode-map
         ("C-c C-c" . org-ctrl-c-ctrl-c)
