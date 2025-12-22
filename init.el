@@ -48,7 +48,8 @@
 (set-cursor-color "#8be9fd")
 (blink-cursor-mode 1)
 (global-hl-line-mode 1)
-
+;; 
+(delete-selection-mode 1)  ; Typing replaces selection
 
 
 
