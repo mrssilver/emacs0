@@ -43,7 +43,6 @@
 
 
 
-//curse
 ;; 简洁实用的配置
 (setq-default cursor-type 'underline)
 (set-cursor-color "#8be9fd")
