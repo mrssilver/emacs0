@@ -198,7 +198,7 @@
 (setq blink-cursor-blinks 0)
 (setq blink-cursor-interval 0.5)
 
-;;; 7. 基础增强
+;;; 7. 基础
 (use-package hl-line
   :hook (after-init . global-hl-line-mode)
   :config
@@ -553,7 +553,7 @@
   (projectile-enable-caching t)
   (projectile-indexing-method 'native))
 
-;;; 18. 搜索增强
+;;; 18. 搜索
 (use-package consult
   :demand t
   :bind
