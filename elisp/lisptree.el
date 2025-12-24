@@ -1,4 +1,3 @@
-
 ;;lisp nodetree
 ;;Lisp 代码语法树解析和显示工具，可以读取缓冲区或选中区域的 Lisp 代码，将其解析为语法树并以树状结构打印：
 
@@ -47,7 +46,7 @@
         (goto-char (point-min))
         (let ((nodes nil)
               (position-stack nil))
-          
+
           ;; 读取所有表达式
           (while (not (eobp))
             (skip-chars-forward " \t\n\r")
@@ -57,7 +56,7 @@
                     (end (point)))
                 (when expr
                   (push (parse-expression expr start end) nodes)))))
-          
+
           (reverse nodes)))
     (error
      (message "解析Lisp代码失败: %s" (error-message-string err))
@@ -82,7 +81,7 @@
                               (lisp-tree-node-depth child) (1+ (lisp-tree-node-depth node)))
                      and collect child))
       node))
-   
+
    ;; 符号
    ((symbolp expr)
     (make-lisp-tree-node
@@ -90,7 +89,7 @@
      :value expr
      :position (cons start end)
      :children nil))
-   
+
    ;; 字符串
    ((stringp expr)
     (make-lisp-tree-node
@@ -98,7 +97,7 @@
      :value expr
      :position (cons start end)
      :children nil))
-   
+
    ;; 数字
    ((numberp expr)
     (make-lisp-tree-node
@@ -106,7 +105,7 @@
      :value expr
      :position (cons start end)
      :children nil))
-   
+
    ;; 关键字
    ((keywordp expr)
     (make-lisp-tree-node
@@ -114,7 +113,7 @@
      :value expr
      :position (cons start end)
      :children nil))
-   
+
    ;; nil
    ((null expr)
     (make-lisp-tree-node
@@ -122,7 +121,7 @@
      :value 'nil
      :position (cons start end)
      :children nil))
-   
+
    ;; 其他
    (t
     (make-lisp-tree-node
@@ -140,9 +139,9 @@
          (value (lisp-tree-node-value node))
          (children (lisp-tree-node-children node))
          (formatted-value (format-tree-node-value value type)))
-    
+
     (insert indent-str)
-    
+
     ;; 根据类型着色
     (let ((color (cond
                   ((eq type 'symbol) (tree-color :symbol))
@@ -151,21 +150,21 @@
                   ((eq type 'number) (tree-color :number))
                   ((eq type 'list) (tree-color :list))
                   (t (tree-color :default)))))
-      
+
       (insert (propertize formatted-value
                           'face `(:foreground ,color
                                   :weight ,(if children 'bold 'normal))
                           'lisp-tree-node node
                           'lisp-tree-depth depth)))
-    
+
     ;; 如果有位置信息，添加位置标记
     (when (lisp-tree-node-position node)
       (let ((pos (lisp-tree-node-position node)))
         (insert (propertize (format " [%d:%d]" (car pos) (cdr pos))
                             'face '(:foreground "#6272a4" :italic t)))))
-    
+
     (insert "\n")
-    
+
     ;; 递归打印子节点
     (dolist (child children)
       (print-tree-node child (1+ (or indent 0))))))
@@ -193,23 +192,23 @@
   "显示Lisp代码的语法树"
   (let* ((nodes (parse-lisp-code code))
          (buffer (get-buffer-create (or buffer-name "*Lisp Syntax Tree*"))))
-    
+
     (with-current-buffer buffer
       (erase-buffer)
       (lisp-tree-mode)
-      
+
       ;; 添加标题
-      (insert (propertize "Lisp 代码语法树分析\n" 
+      (insert (propertize "Lisp 代码语法树分析\n"
                           'face '(:height 1.5 :weight bold :foreground "#ffd700")))
       (insert "\n")
-      
+
       ;; 如果没有节点，显示错误
       (if (null nodes)
           (progn
-            (insert (propertize "错误: 无法解析Lisp代码\n" 
+            (insert (propertize "错误: 无法解析Lisp代码\n"
                                 'face '(:foreground "#ff5555" :weight bold)))
             (insert "请检查代码语法是否正确。\n"))
-        
+
         ;; 显示统计信息
         (let* ((total-nodes (count-tree-nodes nodes))
                (max-depth (tree-max-depth nodes)))
@@ -217,14 +216,14 @@
           (insert (format "总节点数: %d\n" total-nodes))
           (insert (format "最大深度: %d\n" max-depth))
           (insert "\n"))
-        
+
         ;; 打印所有树的根节点
         (dolist (node nodes)
           (print-tree-node node))
-        
+
         ;; 添加分隔线
         (insert "\n" (make-string 80 ?-) "\n\n")
-        
+
         ;; 添加符号表
         (insert (propertize "符号表:\n" 'face '(:weight bold :foreground "#ffd700")))
         (let ((symbols (collect-symbols nodes)))
@@ -233,16 +232,16 @@
                 (cl-loop for (symbol . count) in symbols
                          do (insert (format "  %s: %d 次\n" symbol count))))
             (insert "  (无符号)\n")))
-        
+
         ;; 添加帮助信息
         (insert "\n" (propertize "快捷键:\n" 'face '(:weight bold :foreground "#ffd700")))
         (insert "  n/p - 下一个/上一个节点\n")
         (insert "  t   - 跳转到源码位置\n")
         (insert "  c   - 复制节点\n")
         (insert "  q   - 退出\n"))
-      
+
       (goto-char (point-min)))
-    
+
     (display-buffer buffer)
     buffer))
 
@@ -278,7 +277,7 @@
                     (collect-from-node child))))
       (dolist (node nodes)
         (collect-from-node node)))
-    
+
     ;; 排序并返回列表
     (let (result)
       (maphash (lambda (sym count) (push (cons sym count) result)) symbol-table)
@@ -410,18 +409,18 @@
          (nodes (parse-lisp-code code))
          (func-calls (lisp-tree-analyze-function-calls nodes))
          (buffer (get-buffer-create "*Lisp 函数分析*")))
-    
+
     (with-current-buffer buffer
       (erase-buffer)
-      (insert (propertize "Lisp 函数调用分析\n" 
+      (insert (propertize "Lisp 函数调用分析\n"
                           'face '(:height 1.5 :weight bold :foreground "#ffd700")))
       (insert "\n")
-      
+
       (if func-calls
           (progn
             (insert "| 函数名 | 调用次数 | 平均参数 |\n")
             (insert "|--------+----------+----------|\n")
-            
+
             (let ((func-table (make-hash-table :test 'equal)))
               ;; 统计每个函数的调用情况
               (dolist (call func-calls)
@@ -432,33 +431,33 @@
                       (setf (car entry) (1+ (car entry))
                             (cdr entry) (+ (cdr entry) arg-count))
                     (puthash func-name (cons 1 arg-count) func-table))))
-              
+
               ;; 输出结果
               (maphash (lambda (func-name entry)
                          (let ((count (car entry))
                                (total-args (cdr entry))
                                (avg-args (float (/ (cdr entry) (car entry)))))
-                           (insert (format "| %s | %d | %.1f |\n" 
+                           (insert (format "| %s | %d | %.1f |\n"
                                           func-name count avg-args))))
                        func-table)))
         (insert "未发现函数调用\n"))
-      
+
       (org-mode)
       (org-table-align)
       (setq buffer-read-only t)
       (goto-char (point-min)))
-    
+
     (display-buffer buffer)))
 
-;;; 11. 可视化增强
+;;; 11. 可视化enhan
 (defun lisp-tree-display-graph (nodes)
   "以图形方式显示语法树"
   (let ((buffer (get-buffer-create "*Lisp 语法树图*")))
     (with-current-buffer buffer
       (erase-buffer)
-      (insert "#+TITLE: Lisp 语法树可视化\n")
+      (insert "#+TITLE: elisp  语法树可视化\n")
       (insert "\n")
-      
+
       (cl-labels ((draw-node (node x y)
                     (let* ((type (lisp-tree-node-type node))
                            (value (lisp-tree-node-value node))
@@ -469,10 +468,10 @@
                                    ((eq type 'keyword) (tree-color :keyword))
                                    ((eq type 'list) (tree-color :list))
                                    (t (tree-color :default)))))
-                      
+
                       ;; 绘制当前节点
                       (insert (format "[[%d,%d][%s]]\n" x y label))
-                      
+
                       ;; 绘制子节点
                       (when children
                         (let ((child-count (length children))
@@ -483,22 +482,16 @@
                               ;; 绘制连线
                               (insert (format "[%d,%d] -> [%d,%d]\n" x y child-x child-y))
                               (draw-node (nth i children) child-x child-y))))))))
-        
+
         ;; 绘制所有根节点
         (dotimes (i (length nodes))
           (draw-node (nth i nodes) (* i 3) 0)))
-      
+
       (graphviz-dot-mode)
       (setq buffer-read-only t)
       (goto-char (point-min)))
-    
-    (display-buffer buffer)))
 
-;;; 12. 全局快捷键
-(global-set-key (kbd "C-c l t") 'lisp-tree-from-buffer)
-(global-set-key (kbd "C-c l r") 'lisp-tree-from-region)
-(global-set-key (kbd "C-c l f") 'lisp-tree-from-file)
-(global-set-key (kbd "C-c l a") 'lisp-tree-show-function-analysis)
+    (display-buffer buffer)))
 
 ;;; 13. 示例代码
 (defconst lisp-tree-example-code
@@ -526,242 +519,40 @@
   (lisp-tree-display lisp-tree-example-code "*Lisp 语法树示例*")
   (message "已显示示例代码的语法树"))
 
-;;; 14. 提供模式
 (provide 'lisptree)
 
-;;; 15. 初始化
-(defun lisp-tree-init ()
-  "初始化Lisp语法树系统"
-  (message "Lisp语法树系统已加载"))
 
-(run-with-idle-timer 1 nil 'lisp-tree-init)
 
 
 
 
-1. 基本使用
+;; 显示错乱
 
-分析当前缓冲区 (C-c l t)
+;; ;; 重新解析
+;; M-x lisp-tree-refresh
 
-M-x lisp-tree-from-buffer
 
+;; 内存不足
 
-分析整个缓冲区的Lisp代码并显示语法树。
+;; 对于非常大的文件，建议先选中关键区域进行分析。
 
-分析选中区域 (C-c l r)
+;; 9. 扩展功能
 
-M-x lisp-tree-from-region
+;; 添加自定义分析
 
+;; (defun lisp-tree-analyze-variables (nodes)
+;;   "分析变量使用"
+;;   (let ((vars nil))
+;;     (cl-labels ((analyze-node (node)
+;;                   (when (and (eq (lisp-tree-node-type node) 'symbol)
+;;                              (not (keywordp (lisp-tree-node-value node)))
+;;                              (not (functionp (lisp-tree-node-value node))))
+;;                     (push (lisp-tree-node-value node) vars))
+;;                   (dolist (child (lisp-tree-node-children node))
+;;                     (analyze-node child))))
+;;       (dolist (node nodes)
+;;         (analyze-node node)))
+;;     vars))
 
-先选中一个区域，然后分析选中区域的Lisp代码。
 
-分析文件 (C-c l f)
-
-M-x lisp-tree-from-file
-
-
-选择Lisp文件并分析。
-
-2. 语法树显示界面
-
-显示格式：
-
-Lisp 代码语法树分析
-
-表达式数量: 3
-总节点数: 28
-最大深度: 5
-
-defun [1:5]
-  factorial [6:15]
-  (n) [16:19]
-  "计算阶乘" [20:29]
-  if [30:32]
-    <= [33:35]
-      n [36:37]
-      1 [38:39]
-    1 [40:41]
-    * [42:43]
-      n [44:45]
-      factorial [46:55]
-        1- [56:58]
-          n [59:60]
-
-
-颜色编码：
-
-• 符号: 金色 (#ffd700)
-
-• 关键字: 紫色 (#bd93f9)
-
-• 字符串: 浅金色 (#f1fa8c)
-
-• 数字: 青色 (#8be9fd)
-
-• 列表: 红色 (#ff5555)
-
-• 函数调用: 绿色 (#50fa7b)
-
-3. 导航快捷键
-
-在语法树缓冲区中：
-
-• n - 移动到下一个节点
-
-• p - 移动到上一个节点
-
-• t - 跳转到源码位置
-
-• c - 复制当前节点
-
-• q - 退出缓冲区
-
-• g - 刷新显示
-
-4. 高级功能
-
-函数调用分析 (C-c l a)
-
-M-x lisp-tree-show-function-analysis
-
-
-显示函数调用统计，包括：
-
-• 函数名
-
-• 调用次数
-
-• 平均参数数量
-
-示例代码
-
-M-x lisp-tree-show-example
-
-
-显示预定义的Lisp示例代码的语法树。
-
-5. 显示的特性
-
-1. 节点信息
-
-每个节点显示：
-
-• 节点值
-
-• 节点类型
-
-• 源码位置 [开始:结束]
-
-2. 缩进层次
-
-使用缩进表示树的深度，每层缩进2个空格。
-
-3. 符号统计
-
-在底部显示所有符号及其出现次数，按出现次数排序。
-
-4. 错误处理
-
-如果代码有语法错误，会显示错误信息而不是崩溃。
-
-6. 示例代码解析
-
-输入代码：
-
-(defun factorial (n)
-  (if (<= n 1)
-      1
-    (* n (factorial (1- n)))))
-
-(factorial 5)
-
-
-输出语法树：
-
-defun
-  factorial
-  (n)
-  if
-    <=
-      n
-      1
-    1
-    *
-      n
-      factorial
-        1-
-          n
-factorial
-  5
-
-
-7. 自定义配置
-
-修改颜色方案
-
-(setq tree-colors
-      '((:symbol     . "#ff9900")
-        (:keyword    . "#9966ff")
-        (:string     . "#99ff99")
-        (:number     . "#66ccff")
-        (:list       . "#ff6666")
-        (:function   . "#66ff99")
-        (:variable   . "#ffcc66")))
-
-
-修改缩进宽度
-
-;; 在 print-tree-node 函数中修改
-(make-string (* depth 4) ?\s)  ; 改为4空格缩进
-
-
-添加节点类型
-
-;; 在 parse-expression 函数中添加
-((vectorp expr)
- (make-lisp-tree-node
-  :type 'vector
-  :value expr
-  :position (cons start end)
-  :children (mapcar #'parse-expression (append expr nil))))
-
-
-8. 故障排除
-
-代码解析失败
-
-;; 检查代码语法
-M-x check-parens
-M-x emacs-lisp-byte-compile
-
-
-显示错乱
-
-;; 重新解析
-M-x lisp-tree-refresh
-
-
-内存不足
-
-对于非常大的文件，建议先选中关键区域进行分析。
-
-9. 扩展功能
-
-添加自定义分析
-
-(defun lisp-tree-analyze-variables (nodes)
-  "分析变量使用"
-  (let ((vars nil))
-    (cl-labels ((analyze-node (node)
-                  (when (and (eq (lisp-tree-node-type node) 'symbol)
-                             (not (keywordp (lisp-tree-node-value node)))
-                             (not (functionp (lisp-tree-node-value node))))
-                    (push (lisp-tree-node-value node) vars))
-                  (dolist (child (lisp-tree-node-children node))
-                    (analyze-node child))))
-      (dolist (node nodes)
-        (analyze-node node)))
-    vars))
-
-
-这个Lisp语法树分析工具可以很好地展示Lisp代码的结构，帮助理解和调试复杂的Lisp程序，特别适合学习Lisp语言和调试代码结构。
+;; 这个Lisp语法树分析工具可以很好地展示Lisp代码的结构，帮助理解和调试复杂的Lisp程序，特别适合学习Lisp语言和调试代码结构。

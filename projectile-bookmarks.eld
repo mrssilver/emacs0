@@ -1,1 +1,1 @@
-("~/Documents/github/emacs0/")
+("~/Documents/github/emacs0/" "~/Documents/github/life/")

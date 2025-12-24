@@ -1,4 +1,3 @@
-
 (message "sir only you sir")
 ;; 最佳实践：双稳定源 + 备用最新源
 (require 'package)
@@ -16,7 +15,6 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-
 
 
 ;; 优先使用 UTF-8
@@ -493,7 +491,7 @@
   :demand t
   :custom
   (corfu-auto t)
-  (corfu-auto-delay 0.3)
+  (corfu-auto-delay 0.5)
   (corfu-auto-prefix 2)
   (corfu-quit-at-boundary t)
   (corfu-quit-no-match t)
@@ -527,10 +525,9 @@
   :demand t
   :init
   (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-history)
   (add-to-list 'completion-at-point-functions #'cape-keyword)
-  (add-to-list 'completion-at-point-functions #'cape-symbol))
+)
 
 ;;; 16. 语法检查
 (use-package flycheck
