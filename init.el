@@ -1,5 +1,5 @@
 
-
+(message "sir only you sir")
 ;; 最佳实践：双稳定源 + 备用最新源
 (require 'package)
 (setq package-archives '(("gnu"    . "https://mirrors.ustc.edu.cn/elpa/gnu/")
@@ -12,6 +12,7 @@
 
 (package-initialize)
 
+(add-to-list 'custom-theme-load-path "~/.emacs.d/theme/")
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -48,7 +49,7 @@
 (set-cursor-color "#8be9fd")
 (blink-cursor-mode 1)
 (global-hl-line-mode 1)
-;; 
+;;
 (delete-selection-mode 1)  ; Typing replaces selection
 
 
@@ -60,8 +61,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(undo-tree ## ztree spell-fu slime shell-maker rainbow-mode rainbow-delimiters rainbow-blocks python preview-auto popon perl-doc paredit org-translate org-remark org-pdftools org-journal org-evil org-ai multiple-cursors minimap minibuffer-line minibuffer-header minibar memory-usage matlab-mode magithub lsp-ui isearch-mb helm-org graphviz-dot-mode gotest-ts go-imports go-guru go-gopath go-gen-test go-errcheck go-eldoc go-dlv go-complete go-autocomplete gited git-modes general ffmpeg-player esup ess erc enlive emacsql dracula-theme dot-mode diminish diff-hl company-statistics company-go commenter colorful-mode avy auto-dim-other-buffers auto-correct)))
+ '(package-selected-packages nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -93,22 +93,20 @@
 (setq ring-bell-function 'ignore)
 (setq auto-save-list-file-prefix nil) ; 禁用自动保存列表文件
 
-;;; 1. 包管理器
-(require 'package)
-(setq package-archives '(("gnu"   . "https://elpa.gnu.org/packages/")
-                         ("melpa" . "https://melpa.org/packages/")
-                         ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
-(package-initialize)
 
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
 
-(require 'use-package)
-(setq use-package-always-ensure t)
-(setq use-package-expand-minimally t)
-(setq use-package-verbose nil)
 
+
+
+
+
+
+
+
+
+
+
+;;duplicate
 ;;; 2. 颜色系统
 (defvar gold-theme-colors
   '((:night-bg      . "#0a0a0a")
@@ -147,50 +145,37 @@
   :custom
   ;; 全屏
   (default-frame-alist '((fullscreen . maximized)))
-  
+
   ;; 禁用 GUI 元素
   (tool-bar-mode nil)
   (scroll-bar-mode nil)
-  (menu-bar-mode nil)
-  
+  (menu-bar-mode t)
+
   ;; 窗口设置
   (frame-title-format "Emacs - %b")
   (column-number-mode t)
   (line-number-mode t))
 
-;;; 4. 字体设置 - Maple Mono
-(defun setup-fonts ()
-  "设置字体为 Maple Mono"
-  (when (display-graphic-p)
-    ;; 主字体
-    (set-face-attribute 'default nil
-                        :family "Maple Mono"
-                        :height 134
-                        :weight 'normal)
-    ;; 固定宽度字体
-    (set-face-attribute 'fixed-pitch nil
-                        :family "Maple Mono"
-                        :height 134)
-    ;; 可变宽度字体
-    (set-face-attribute 'variable-pitch nil
-                        :family "DejaVu Sans"
-                        :height 134)
-    ;; 行号字体
-    (set-face-attribute 'line-number nil
-                        :family "Maple Mono"
-                        :height 124)
-    (set-face-attribute 'line-number-current-line nil
-                        :family "Maple Mono"
-                        :height 124
-                        :weight 'bold)
-    (message "字体已设置为 Maple Mono 13.4")))
 
 ;;; 5. 黄金主题
 (use-package gold-theme
-  :load-path "~/.emacs.d/themes/"
+  :load-path "~/.emacs.d/theme/"
   :demand t
   :config
-  (load-theme 'gold-theme t))
+  (load-theme 'gold t))
+
+
+
+
+
+
+;; 设置彩虹分隔符颜色
+(setq rainbow-delimiters-colors
+  '("#ffd700"    ; 黄金
+    "#bd93f9"    ; 辅助紫色
+    "#ff5555"    ; 血红
+    "#8be9fd"    ; 青色
+    "#50fa7b"))  ; 绿色
 
 ;;; 6. 光标设置
 (setq-default cursor-type 'underline)
@@ -316,12 +301,12 @@
   (setq org-adapt-indentation t)       ; 自适应缩进
   (setq org-src-preserve-indentation t) ; 保留源代码缩进
   (setq org-edit-src-content-indentation 0) ; 源代码内容缩进
-  
+
   ;; 代码块设置
   (setq org-src-fontify-natively t)    ; 语法高亮
   (setq org-src-tab-acts-natively t)   ; Tab 键行为
   (setq org-src-window-setup 'current-window) ; 在当前窗口编辑
-  
+
   ;; 代码块边框和背景色
   (set-face-attribute 'org-block-begin-line nil
                       :foreground (gold-color :gold-primary)
@@ -329,23 +314,23 @@
                       :overline (gold-color :gold-primary)
                       :underline (gold-color :gold-primary)
                       :weight 'bold)
-  
+
   (set-face-attribute 'org-block-end-line nil
                       :foreground (gold-color :gold-primary)
                       :background (gold-color :org-code-bg)
                       :overline (gold-color :gold-primary)
                       :underline (gold-color :gold-primary)
                       :weight 'bold)
-  
+
   (set-face-attribute 'org-block nil
                       :foreground (gold-color :milky-fg)
                       :background (gold-color :org-code-bg)
                       :extend t)
-  
+
   (set-face-attribute 'org-code nil
                       :foreground (gold-color :gold-secondary)
                       :background (gold-color :org-code-bg))
-  
+
   ;; 标题设置
   (set-face-attribute 'org-level-1 nil
                       :foreground (gold-color :gold-primary)
@@ -358,16 +343,16 @@
   (set-face-attribute 'org-level-3 nil
                       :foreground (gold-color :aux-purple)
                       :height 1.1)
-  
+
   ;; 列表设置
   (set-face-attribute 'org-list-dt nil
                       :foreground (gold-color :cyan))
-  
+
   ;; 链接设置
   (set-face-attribute 'org-link nil
                       :foreground (gold-color :cyan)
                       :underline t)
-  
+
   ;; 待办事项
   (set-face-attribute 'org-todo nil
                       :foreground (gold-color :blood-red)
@@ -375,42 +360,31 @@
   (set-face-attribute 'org-done nil
                       :foreground (gold-color :green)
                       :weight 'bold)
-  
+
   ;; 元数据
   (set-face-attribute 'org-meta-line nil
                       :foreground (gold-color :gray))
   (set-face-attribute 'org-document-info-keyword nil
                       :foreground (gold-color :gray))
-  
+
   ;; 日期
   (set-face-attribute 'org-date nil
                       :foreground (gold-color :pink)
                       :underline t)
-  
+
   ;; 表格
   (set-face-attribute 'org-table nil
                       :foreground (gold-color :milky-fg-alt))
-  
+
   ;; 引用
   (set-face-attribute 'org-quote nil
                       :foreground (gold-color :gold-secondary)
                       :slant 'italic
                       :extend t)
-  
-  ;; 文字修饰
-  (set-face-attribute 'org-bold nil
-                      :foreground (gold-color :gold-primary)
-                      :weight 'bold)
-  (set-face-attribute 'org-italic nil
-                      :foreground (gold-color :aux-purple)
-                      :slant 'italic)
-  (set-face-attribute 'org-verbatim nil
-                      :foreground (gold-color :gold-secondary)
-                      :background (gold-color :org-code-bg))
-  
+
   :custom
-  (org-src-block-faces '((nil . (:background "#e0f2e0" 
-                          :extend t 
+  (org-src-block-faces '((nil . (:background "#e0f2e0"
+                          :extend t
                           :box (:line-width 1 :color "#c0e0c0" :style rounded)
                           :padding "0.5em"))))
   :bind
@@ -427,7 +401,7 @@
   ;; 性能优化设置
   (lsp-enable-symbol-highlighting t)   ; 启用符号高亮
   (lsp-semantic-tokens-enable t)       ; 启用语义标记
-  (lsp-enable-on-type-formatting nil)  ; 禁用输入时格式化（提高性能）
+;;  (lsp-enable-on-type-formatting nil)  ; 禁用输入时格式化（提高性能）;;funciton definition is void
   (lsp-enable-text-document-color nil) ; 禁用文档颜色
   (lsp-enable-indentation nil)         ; 禁用缩进
   (lsp-enable-imenu t)                 ; 启用 imenu
@@ -445,16 +419,20 @@
   (lsp-log-io nil)                     ; 禁用日志
   (lsp-eldoc-enable-hover t)           ; 启用悬停
   (lsp-eldoc-render-all t)             ; 渲染所有
-  
+
   ;; 字体锁定优化
+(lsp-semantic-tokens-enable t)       ; 语义标记
   (lsp-semantic-tokens-apply-modifiers t) ; 应用修改器
   (lsp-semantic-tokens-apply-adjustments t) ; 应用调整
-  
+;; 禁用不必要的 LSP 功能以提高性能
+(lsp-lens-enable nil)                ; 禁用镜头
+;; 启用必要的优化
+
   :init
   (setq lsp-completion-enable t
         lsp-completion-show-detail t
         lsp-completion-show-kind t)
-  
+
   :config
   ;; 字体锁定优化函数
   (defun optimize-lsp-font-lock ()
@@ -466,16 +444,16 @@
     (setq-local lazy-highlight-cleanup nil)
     (setq-local lazy-highlight-initial-delay 0)
     (setq-local lazy-highlight-interval 0))
-  
+
   (add-hook 'lsp-mode-hook 'optimize-lsp-font-lock)
-  
+
   ;; 快捷键
   (define-key lsp-mode-map (kbd "C-c l d") 'lsp-describe-thing-at-point)
   (define-key lsp-mode-map (kbd "C-c l r") 'lsp-rename)
   (define-key lsp-mode-map (kbd "C-c l f") 'lsp-format-buffer)
   (define-key lsp-mode-map (kbd "C-c l a") 'lsp-execute-code-action)
   (define-key lsp-mode-map (kbd "C-c l h") 'lsp-ui-doc-show)
-  
+
   ;; 颜色配置
   (set-face-attribute 'lsp-face-highlight-textual nil
                       :background (gold-color :aux-purple)
@@ -670,12 +648,11 @@
 ;;; 23. 最终初始化
 (defun final-init ()
   "最终初始化函数"
-  (setup-fonts)
   (setq gc-cons-threshold (* 100 1000 1000))
-  
+
   (let ((init-time (float-time (time-subtract (current-time) before-init-time))))
     (message "🚀 Emacs 启动完成，耗时 %.2f 秒" init-time)
-    
+
     (message "优化设置已生效:")
     (message "  • 字体: Maple Mono 13.4")
     (message "  • Tab 宽度: 8")
@@ -685,7 +662,7 @@
     (message "  • 备份/自动保存: 已禁用")
     (message "  • Org 代码块: 黄金色边框")
     (message "  • LSP 字体锁定: 已优化")
-    
+
     (message "使用 C-c g 查看所有快捷键")))
 
 ;; 记录启动时间
@@ -695,15 +672,6 @@
 (run-with-idle-timer 1 nil 'final-init)
 
 
-;; 禁用不必要的 LSP 功能以提高性能
-(lsp-enable-on-type-formatting nil)  ; 禁用输入时格式化
-(lsp-enable-file-watchers nil)       ; 禁用文件监视
-(lsp-lens-enable nil)                ; 禁用镜头
-(lsp-headerline-breadcrumb-enable nil) ; 禁用面包屑
-
-;; 启用必要的优化
-(lsp-semantic-tokens-enable t)       ; 语义标记
-(lsp-semantic-tokens-apply-modifiers t) ; 应用修改器
 
 
 
@@ -766,11 +734,6 @@
 (benchmark-run 10
   (font-lock-fontify-buffer))
 
-;; 安装 font-benchmark
-(use-package font-benchmark
-  :ensure t
-  :config
-  (setq font-benchmark-directory "~/test-files"))
 
 ;; 延迟字体化
 (setq font-lock-support-mode 'jit-lock-mode)
@@ -797,12 +760,12 @@
   ;; 测试 1: 基本字体化
   (message "=== 测试 1: 基本字体化 ===")
   (benchmark-font-lock)
-  
+
   ;; 测试 2: 禁用字体化
   (message "\n=== 测试 2: 禁用字体化 ===")
   (let ((font-lock-mode nil))
     (benchmark-font-lock))
-  
+
   ;; 测试 3: 不同级别
   (message "\n=== 测试 3: 不同装饰级别 ===")
   (dotimes (level 4)
@@ -900,11 +863,6 @@
 
 
 
-;; highlight-indent-guides 的自定义
-(set-face-background 'highlight-indent-guides-odd-face "gray20")
-(set-face-background 'highlight-indent-guides-even-face "gray15")
-(set-face-foreground 'highlight-indent-guides-character-face "gray40")
-
 ;; 修改竖线字符
 (setq highlight-indent-guides-character ?┃)  ; 更粗的竖线
 ;; 或
@@ -932,3 +890,4 @@
   (setq highlight-indent-guides-character ?┆)  ; 虚线竖线
   (setq highlight-indent-guides-auto-character-face-perc 10)  ; 透明度
   (setq highlight-indent-guides-responsive 'top))
+(toggle-frame-fullscreen)
