@@ -1,0 +1,39 @@
+readme
+;; 1. 创建树
+(setq my-tree (create-example-tree))
+
+;; 2. 打印树
+(print-tree my-tree)
+
+;; 3. 获取树字符串
+(setq tree-str (tree-to-string my-tree))
+
+;; 4. 在buffer中查看
+(view-tree)
+
+;; 5. 运行演示
+(demo-tree-printing)
+(demo-custom-printing)
+
+
+输出示例
+
+运行 (demo-tree-printing) 会输出：
+
+=== 带连接线的树形打印 ===
+└── project-root
+    ├── src
+    │   ├── main.el
+    │   ├── utils.el
+    │   ├── config.el
+    │   └── lib
+    │       └── helper.el
+    ├── tests
+    │   ├── test-main.el
+    │   └── test-utils.el
+    └── docs
+        ├── README.md
+        └── API.md
+
+=== Lisp格式 (S表达式) ===
+(project-root (src main.el utils.el config.el (lib helper.el)) (tests test-main.el test-utils.el) (docs README.md API.md))
