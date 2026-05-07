@@ -1,5 +1,3 @@
-(message "sir only you sir")
-;; 最佳实践：双稳定源 + 备用最新源
 (require 'package)
 (setq package-archives '(("gnu"    . "https://mirrors.ustc.edu.cn/elpa/gnu/")
                         ("nongnu" . "https://mirrors.ustc.edu.cn/elpa/nongnu/")
@@ -32,71 +30,11 @@
 (setq-default tab-width 8) ; 制表符显示宽度
 ;; 方法2：缩进宽度设置为 8 tab is spc
 
-(setq-default standard-indent 8)
-(setq-default indent-tabs-mode nil)  ; 使用空格缩进
-
-;;nil or t tab show 8 spc
-;; 确保 Tab 键插入制表符，而不是空格
-;;(setq-default indent-tabs-mode t)
-
-
-
-
-;; 简洁实用的配置
-(setq-default cursor-type 'underline)
-(set-cursor-color "#8be9fd")
-(blink-cursor-mode 1)
+;;(setq-default standard-indent 8)
+(setq-default tab-first-completion 'word-or-paren-or-punct)
+(setq default-directory "~/Documents/github/")
 (global-hl-line-mode 1)
-;;
 (delete-selection-mode 1)  ; Typing replaces selection
-
-
-
-
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages nil))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-
-;;; ==========================================
-;;; Emacs 初始化配置 - 性能与外观优化版
-;;; ==========================================
-
-;;; 0. 性能优化
-(setq gc-cons-threshold 100000000)    ; 提高GC阈值
-(setq read-process-output-max (* 1024 1024 4))
-(setq byte-compile-warnings nil)
-(setq native-comp-async-report-warnings-errors nil)
-(setq load-prefer-newer t)
-(setq file-name-handler-alist nil)
-
-;; 禁用启动时的杂项
-(setq inhibit-startup-screen t)
-(setq inhibit-startup-echo-area-message t)
-(setq inhibit-startup-buffer-menu t)
-(setq initial-scratch-message nil)
-(setq initial-major-mode 'fundamental-mode)
-(setq auto-save-default nil)          ; 禁用自动保存
-(setq make-backup-files nil)          ; 禁用备份文件
-(setq create-lockfiles nil)          ; 禁用锁文件
-(setq ring-bell-function 'ignore)
-(setq auto-save-list-file-prefix nil) ; 禁用自动保存列表文件
-
-
-
-
-
-
-
 
 
 
@@ -111,13 +49,13 @@
     (:night-bg-alt  . "#1a1a1a")
     (:milky-fg      . "#f8f8f2")
     (:milky-fg-alt  . "#e2e2dc")
-    (:gold-primary  . "#ffd700")
+    (:gold-primary  . "#fff700")
     (:gold-secondary . "#f1fa8c")
     (:blood-red     . "#ff5555")
     (:aux-purple    . "#bd93f9")
     (:aux-purple-alt . "#9370DB")
     (:cyan          . "#8be9fd")
-    (:green         . "#50fa7b")
+    (:green         . "#50fa00")
     (:orange        . "#ffb86c")
     (:pink          . "#ff79c6")
     (:gray          . "#6272a4")
@@ -137,6 +75,48 @@
 (defun gold-color (name)
   "获取颜色值"
   (cdr (assoc name gold-theme-colors)))
+
+;;test                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+
+
+
+;; 在定义完 gold-color 函数后，或者在主题启用函数中调用
+;;(set-face-attribute 'region  nil :foreground (gold-color :green) :background (gold-color :blood-red))
+;;'(region ((t (:extend t :background "dark magenta" :foreground "#0a0a0a"))))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(cape consult corfu doom-modeline flycheck go-imports go-mode
+	  indent-guide lsp-ui orderless projectile rainbow-blocks
+	  rainbow-delimiters rainbow-mode spell-fu stock-ticker
+	  undo-tree))
+ '(warning-suppress-log-types '((use-package))))
+
+;;; ==========================================
+;;; Emacs 初始化配置 - 性能与外观优化版
+;;; ==========================================
+
+;;; 0. 性能优化
+(setq gc-cons-threshold (* 1024 1024 128)) ; 提高GC阈值
+(setq read-process-output-max (* 1024 1024 32))
+(setq byte-compile-warnings nil)
+(setq native-comp-async-report-warnings-errors nil)
+(setq load-prefer-newer t)
+(setq file-name-handler-alist nil)
+
+;; 禁用启动时的杂项
+(setq inhibit-startup-screen t)
+(setq inhibit-startup-echo-area-message t)
+(setq inhibit-startup-buffer-menu t)
+(setq initial-scratch-message nil)
+(setq initial-major-mode 'fundamental-mode)
+
+
 
 ;;; 3. 核心界面设置
 (use-package emacs
@@ -162,12 +142,7 @@
   :config
   (load-theme 'gold t))
 
-
-
-
-
-
-;; 设置彩虹分隔符颜色
+;; 设置分隔符颜色
 (setq rainbow-delimiters-colors
   '("#ffd700"    ; 黄金
     "#bd93f9"    ; 辅助紫色
@@ -175,12 +150,6 @@
     "#8be9fd"    ; 青色
     "#50fa7b"))  ; 绿色
 
-;;; 6. 光标设置
-(setq-default cursor-type 'underline)
-(set-cursor-color (gold-color :blood-red))
-(blink-cursor-mode 1)
-(setq blink-cursor-blinks 0)
-(setq blink-cursor-interval 0.5)
 
 ;;; 7. 基础
 (use-package hl-line
@@ -188,7 +157,7 @@
   :config
   (set-face-attribute 'hl-line nil
                       :background (gold-color :night-bg-alt)
-                      :underline (gold-color :blood-red)))
+                      :underline (gold-color :gold-primary)))
 
 (use-package isearch
   :ensure nil
@@ -209,10 +178,10 @@
   :hook ((prog-mode text-mode conf-mode) . display-line-numbers-mode)
   :config
   (setq display-line-numbers-type 'relative
-        display-line-numbers-width 4
+        display-line-numbers-width 1
         display-line-numbers-grow-only t)
   (set-face-attribute 'line-number nil
-                      :foreground (gold-color :gray)
+                      :foreground (gold-color :gold-secondary)
                       :background (gold-color :night-bg))
   (set-face-attribute 'line-number-current-line nil
                       :foreground (gold-color :gold-primary)
@@ -231,36 +200,32 @@
             (setq truncate-lines t)    ; 编程模式下禁用软换行
             (visual-line-mode -1)))
 
+
+
+
+
 ;;; 10. Tab 和缩进设置
 (setq-default tab-width 8)             ; Tab 宽度为 8
-(setq-default indent-tabs-mode nil)    ; 使用空格而非 Tab
-(setq tab-stop-list (number-sequence 8 120 8)) ; Tab 停止位置
-(setq c-basic-offset 8)                ; C 风格语言缩进
-(setq python-indent-offset 8)          ; Python 缩进
-(setq js-indent-level 8)               ; JavaScript 缩进
-(setq css-indent-offset 8)             ; CSS 缩进
-(setq standard-indent 8)               ; 标准缩进
 
 ;; 显示空格和 Tab
-(setq whitespace-style '(face tabs spaces trailing space-before-tab
-                             newline indentation empty space-after-tab
-                             space-mark tab-mark newline-mark))
+(setq whitespace-style '(face tabs spaces space-before-tab
+                              indentation  space-after-tab
+                             tab-mark));;trailing
 (setq whitespace-display-mappings
       '((space-mark 32 [183] [46])     ; 空格显示为中间点
         (newline-mark 10 [182 10])     ; 换行符
         (tab-mark 9 [9654 9] [92 9]))) ; Tab 显示为三角形
 (global-whitespace-mode 1)             ; 启用全局空白显示
 
+
 ;;; 11. Undotree
 (use-package undo-tree
   :demand t
   :config
-  (global-undo-tree-mode 1)
+  (global-undo-tree-mode t)
   (setq undo-tree-visualizer-timestamps t)
-  (setq undo-tree-visualizer-diff t)
-  (setq undo-tree-auto-save-history t)
-  (setq undo-tree-history-directory-alist
-        `(("." . ,(expand-file-name "undo-tree-history" user-emacs-directory))))
+  (setq undo-tree-visualizer-diff nil);;expensive
+  (setq undo-tree-auto-save-history nil)
   (setq undo-tree-visualizer-relative-timestamps t)
   (set-face-attribute 'undo-tree-visualizer-current-face nil
                       :foreground (gold-color :gold-primary)
@@ -268,17 +233,18 @@
   (set-face-attribute 'undo-tree-visualizer-active-branch-face nil
                       :foreground (gold-color :aux-purple))
   (set-face-attribute 'undo-tree-visualizer-default-face nil
-                      :foreground (gold-color :gray))
+                      :foreground (gold-color :red))
   :bind
-  (("C-x u" . undo-tree-visualize)     ; 可视化 undo
-   ("C-_" . undo-tree-undo)            ; 撤销
-   ("M-_" . undo-tree-redo)))          ; 重做
+  (("C-x U" . undo-tree-visualize)     ; 可视化 undo
+   ("C-x C-u" . undo-tree-undo)            ; 撤销
+   ("C-x C-r" . undo-tree-redo)))          ; 重做
 
 ;;; 12. 文件保存设置
 (setq auto-save-default nil)           ; 禁用自动保存
 (setq make-backup-files nil)           ; 禁用备份文件
 (setq create-lockfiles nil)            ; 禁用锁文件
 (setq auto-save-list-file-name nil)    ; 禁用自动保存列表
+(setq auto-save-list-file-prefix nil)  ; 禁用自动保存列表文件
 (setq version-control nil)             ; 不使用版本控制
 (setq delete-old-versions t)           ; 删除旧版本
 (setq kept-old-versions 0)             ; 不保留旧版本
@@ -289,6 +255,21 @@
 
 ;; 保存时自动删除尾部空格
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+
+
+
+(setq ring-bell-function 'ignore)
+
+
+
+
+
+
+
+
+
+
 
 ;;; 13. Org Mode 配置
 (use-package org
@@ -432,18 +413,6 @@
         lsp-completion-show-kind t)
 
   :config
-  ;; 字体锁定优化函数
-  (defun optimize-lsp-font-lock ()
-    "优化 LSP 字体锁定性能"
-    (setq-local font-lock-maximum-decoration t)
-    (setq-local font-lock-multiline t)
-    (when (boundp 'jit-lock-mode)
-      (jit-lock-mode 1))
-    (setq-local lazy-highlight-cleanup nil)
-    (setq-local lazy-highlight-initial-delay 0)
-    (setq-local lazy-highlight-interval 0))
-
-  (add-hook 'lsp-mode-hook 'optimize-lsp-font-lock)
 
   ;; 快捷键
   (define-key lsp-mode-map (kbd "C-c l d") 'lsp-describe-thing-at-point)
@@ -504,8 +473,8 @@
   (corfu-scroll-margin 2)
   :bind
   (:map corfu-map
-        ("TAB" . corfu-next)
-        ([tab] . corfu-next)
+        ("M-TAB" . corfu-next)
+;;        ([tab] . corfu-next)
         ("S-TAB" . corfu-previous)
         ([backtab] . corfu-previous)
         ("RET" . corfu-insert))
@@ -519,6 +488,9 @@
   (set-face-attribute 'corfu-default nil
                       :background (gold-color :night-bg-alt)
                       :foreground (gold-color :milky-fg)))
+
+
+
 
 ;; Cape
 (use-package cape
@@ -572,6 +544,11 @@
               (gold-color :blood-red)
               (gold-color :cyan)
               (gold-color :green))))
+
+
+
+
+
 
 (use-package which-key
   :config
@@ -689,18 +666,9 @@
 
 (set-face-attribute 'default nil
                     :family "Maple Mono"
-                    :height 134)  ; 13.4
+                    :height 195)  ; 19.5
 
 
-
-
-
-(global-undo-tree-mode 1)              ; 全局启用
-(setq undo-tree-auto-save-history t)   ; 自动保存历史
-;; 快捷键
-(global-set-key (kbd "C-x u") 'undo-tree-visualize)
-(global-set-key (kbd "C-_") 'undo-tree-undo)
-(global-set-key (kbd "M-_") 'undo-tree-redo)
 
 
 
@@ -734,11 +702,11 @@
 
 ;; 延迟字体化
 (setq font-lock-support-mode 'jit-lock-mode)
-(setq jit-lock-defer-time 0.05)  ; 延迟 0.05 秒
+(setq jit-lock-defer-time 0.5)  ; 延迟 0.5 秒
 (setq jit-lock-stealth-time 1)   ; 空闲 1 秒后字体化
 ;; 只字体化可见区域
 (setq font-lock-support-mode 'lazy-lock-mode)
-(setq lazy-lock-defer-time 0.2)
+(setq lazy-lock-defer-time 1.2)
 (setq lazy-lock-defer-on-the-fly t)
 (setq lazy-lock-defer-on-scrolling t)
 
@@ -778,7 +746,7 @@
     ;; 禁用部分高亮
     (setq font-lock-maximum-decoration 1)
     ;; 增大延迟
-    (setq jit-lock-defer-time 0.5)
+    (setq jit-lock-defer-time 1.5)
     ;; 禁用自动换行
     (setq truncate-lines t)
     ;; 减少语法检查
@@ -788,37 +756,19 @@
 
 
 
-;; 为不同编程语言设置不同的优化策略
-(setq my-font-lock-optimizations
-      '((c-mode . (:level 2 :delay 0.1))
-        (python-mode . (:level 3 :delay 0.05))
-        (web-mode . (:level 2 :delay 0.2))
-        (emacs-lisp-mode . (:level 4 :delay 0.01))))
-
-(defun apply-mode-optimizations ()
-  (let* ((mode major-mode)
-         (settings (cdr (assoc mode my-font-lock-optimizations))))
-    (when settings
-      (setq font-lock-maximum-decoration (plist-get settings :level))
-      (setq jit-lock-defer-time (plist-get settings :delay)))))
-
-(add-hook 'prog-mode-hook 'apply-mode-optimizations)
-
-
-
 ;; 根据系统负载动态调整
 (defun dynamic-font-lock-adjust ()
   (cond ((> (car (load-average)) 2.0)
          ;; 高负载时降低质量
-         (setq jit-lock-defer-time 0.3)
+         (setq jit-lock-defer-time 1.9)
          (setq font-lock-maximum-decoration 1))
         ((< (car (load-average)) 0.5)
          ;; 低负载时提高质量
-         (setq jit-lock-defer-time 0.01)
+         (setq jit-lock-defer-time 0.1)
          (setq font-lock-maximum-decoration 3))
         (t
          ;; 中等负载
-         (setq jit-lock-defer-time 0.1)
+         (setq jit-lock-defer-time 0.5)
          (setq font-lock-maximum-decoration 2))))
 
 (run-with-idle-timer 10 t 'dynamic-font-lock-adjust)
@@ -830,15 +780,6 @@
 (setq lazy-lock-defer-on-scrolling t)
 
 
-;; 安装
-(use-package highlight-indent-guides
-  :ensure t
-  :hook (prog-mode . highlight-indent-guides-mode)
-  :config
-  (setq highlight-indent-guides-method 'character)  ; 或 'column, 'fill
-  (setq highlight-indent-guides-character ?│)      ; 使用竖线字符
-  (setq highlight-indent-guides-auto-enabled t)
-  (setq highlight-indent-guides-responsive 'top))  ; 只在顶部显示
 
 
 
@@ -855,36 +796,22 @@
 (setq-default display-fill-column-indicator-column 80)
 (global-display-fill-column-indicator-mode 1)
 
-;; 自定义颜色
-(set-face-foreground 'fill-column-indicator "#3f3f3f")
 
-
-
-;; 修改竖线字符
-(setq highlight-indent-guides-character ?┃)  ; 更粗的竖线
-;; 或
-(setq highlight-indent-guides-character ?▏)  ; 细竖线
-
-
-
-;; 只在特定模式启用
-(add-hook 'python-mode-hook 'highlight-indent-guides-mode)
-(add-hook 'js-mode-hook 'highlight-indent-guides-mode)
-(add-hook 'emacs-lisp-mode-hook 'highlight-indent-guides-mode)
 
 ;; 在左侧边缘显示竖线
 (setq indicate-empty-lines t)
 (setq indicate-buffer-boundaries 'left)
 
 ;; 显示行号时添加分隔线
-(setq linum-format "%4d │ ")
+(setq linum-format "%3d │ ")
 
-(use-package highlight-indent-guides
-  :ensure t
-  :hook ((prog-mode yaml-mode) . highlight-indent-guides-mode)
-  :config
-  (setq highlight-indent-guides-method 'character)
-  (setq highlight-indent-guides-character ?┆)  ; 虚线竖线
-  (setq highlight-indent-guides-auto-character-face-perc 10)  ; 透明度
-  (setq highlight-indent-guides-responsive 'top))
-(toggle-frame-fullscreen)
+
+
+( toggle-frame-fullscreen)
+
+
+
+
+
+
+(message "sir only you sir")
