@@ -542,21 +542,21 @@
   (setq flycheck-display-errors-delay 0.2))
 
 ;;; 17. 项目管理
-(use-package projectile
-  :init
-  (projectile-mode t)
-  :custom
-  (bookmark-save-flag nil)
-  (projectile-save-buffers-always nil)
-  (projectile-completion-system 'default)
-  (projectile-switch-project-action 'projectile-dired)
-  (projectile-bookmark-file nil)
-(projectile-enable-caching nil)
-  (projectile-persist-bookmarks nil)
-(project-list-file nil)
-  (projectile-cache-file nil)
-  (projectile-indexing-method 'native))
-
+;;(use-package projectile
+;;  :init
+;;  (projectile-mode t)
+;;  :custom
+;;  (bookmark-save-flag nil)
+;;  (projectile-save-buffers-always nil)
+;;  (projectile-completion-system 'default)
+;;  (projectile-switch-project-action 'projectile-dired)
+;;  (projectile-bookmark-file nil)
+;;(projectile-enable-caching nil)
+;;  (projectile-persist-bookmarks nil)
+;;(project-list-file nil)
+;;  (projectile-cache-file nil)
+;;  (projectile-indexing-method 'native))
+;;
 ;;; 18. 搜索
 (use-package consult
   :demand t
@@ -564,7 +564,7 @@
   (
   ( "C-l" . consult-line)
   ("C-x b" . consult-buffer)
-   ("M-g g" . consult-goto-line)
+   ("M-g" . consult-goto-line)
    ("M-y" . consult-yank-pop)))
 
 (use-package orderless
