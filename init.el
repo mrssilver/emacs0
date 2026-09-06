@@ -1,7 +1,7 @@
 ;;; package --- Summary
 ;;; Commentary:
 ;;;  need print lisp-tree weather support chinese projectile bookmarks cache
-
+;;; define mrsilver function
 (setq package-archives '(("gnu"    . "https://mirrors.ustc.edu.cn/elpa/gnu/")
                         ("nongnu" . "https://mirrors.ustc.edu.cn/elpa/nongnu/")
                     ("melpa"  . "https://mirrors.ustc.edu.cn/elpa/melpa/")))
@@ -18,12 +18,10 @@
   (package-install 'use-package))
 
 
-
 (global-set-key (kbd "M-<down>") 'next-error)
 (global-set-key (kbd "M-<up>") 'previous-error)
 (global-set-key (kbd "M-<left>") 'beginning-of-buffer)
 (global-set-key (kbd "M-<right>") 'end-of-buffer)
-
 
 
 
@@ -246,8 +244,8 @@
   (global-undo-tree-mode t)
 
   ;; 设置 undo-tree/Emacs 原生撤销限制 (单位: 字节)
-(setq undo-limit (* 1024 1024 128))          ;; 128 MB (软限制)
-(setq undo-strong-limit (* 1024 1024 256))  ;; 256 MB (限制，约为 soft 的 1.5 倍)
+(setq undo-limit (* 1024 1024 8))          ;; 8 MB (软限制) emacs gc fifo
+(setq undo-strong-limit (* 1024 1024 32))  ;; 32 MB (限制，约为 soft 的 1.5 倍) only latest record
 (setq undo-outer-limit (* 1024 1024 512))  ;; 512 MB (硬限制，防止单次操作崩溃)
 ;; 1. 禁用默认的时间戳显示（减少节点数据量）
 (setq undo-tree-visualizer-timestamps nil)
@@ -397,11 +395,13 @@
                           :extend t
                           :box (:line-width 1 :color "#c0e0c0" :style rounded)
                           :padding "0.5em"))))
-  :bind
-  (:map org-mode-map
-        ("C-c C-c" . org-ctrl-c-ctrl-c)
-        ("C-c C-e" . org-export-dispatch)
-        ("C-c C-l" . org-insert-link)))
+
+  :bind (:map org-mode-map
+              ("M-<down>" . next-error)
+              ("M-<up>" . previous-error)
+              ("M-<left>" . beginning-of-buffer)
+              ("M-<right>" . end-of-buffer)))
+
 
 ;;; 14. LSP 模式 - 性能优化
 (use-package lsp-mode
@@ -542,21 +542,21 @@
   (setq flycheck-display-errors-delay 0.2))
 
 ;;; 17. 项目管理
-(use-package projectile
-  :init
-  (projectile-mode t)
-  :custom
-  (bookmark-save-flag nil)
-  (projectile-save-buffers-always nil)
-  (projectile-completion-system 'default)
-  (projectile-switch-project-action 'projectile-dired)
-  (projectile-bookmark-file nil)
-(projectile-enable-caching nil)
-  (projectile-persist-bookmarks nil)
-(project-list-file nil)
-  (projectile-cache-file nil)
-  (projectile-indexing-method 'native))
-
+;;(use-package projectile
+;;  :init
+;;  (projectile-mode t)
+;;  :custom
+;;  (bookmark-save-flag nil)
+;;  (projectile-save-buffers-always nil)
+;;  (projectile-completion-system 'default)
+;;  (projectile-switch-project-action 'projectile-dired)
+;;  (projectile-bookmark-file nil)
+;;(projectile-enable-caching nil)
+;;  (projectile-persist-bookmarks nil)
+;;(project-list-file nil)
+;;  (projectile-cache-file nil)
+;;  (projectile-indexing-method 'native))
+;;
 ;;; 18. 搜索
 (use-package consult
   :demand t
@@ -564,7 +564,7 @@
   (
   ( "C-l" . consult-line)
   ("C-x b" . consult-buffer)
-   ("M-g g" . consult-goto-line)
+   ("M-g" . consult-goto-line)
    ("M-y" . consult-yank-pop)))
 
 (use-package orderless
@@ -727,7 +727,7 @@
 (setq lazy-lock-defer-on-scrolling t)
 
 
-(defun benchmark-font-lock ()
+(defun mrsilver/benchmark-font-lock ()
   "测试字体化性能"
   (interactive)
   (let ((start-time (current-time)))
@@ -736,7 +736,7 @@
              (float-time (time-since start-time)))))
 
 
-(defun test-font-lock-performance ()
+(defun mrsilver/test-font-lock-performance ()
   "运行一系列性能测试"
   (interactive)
   ;; 测试 1: 基本字体化
@@ -799,7 +799,6 @@
 ;; 显示行号时添加分隔线
 (setq linum-format "%3d │ "))
 
-(message "iiss 783")
 
 
 ;;;  拼写检查 (Spell-fu)
@@ -838,7 +837,6 @@
 
 ;;occur pre line
 
-
 ( toggle-frame-fullscreen)
 
-(message "sir only you sir")
+(message "sir only you　❤️‍🩹　 sir")
