@@ -1,4 +1,7 @@
-(require 'package)
+;;; package --- Summary
+;;; Commentary:
+;;;  need print lisp-tree weather support chinese projectile bookmarks cache
+
 (setq package-archives '(("gnu"    . "https://mirrors.ustc.edu.cn/elpa/gnu/")
                         ("nongnu" . "https://mirrors.ustc.edu.cn/elpa/nongnu/")
                     ("melpa"  . "https://mirrors.ustc.edu.cn/elpa/melpa/")))
@@ -15,6 +18,15 @@
   (package-install 'use-package))
 
 
+
+(global-set-key (kbd "M-<down>") 'next-error)
+(global-set-key (kbd "M-<up>") 'previous-error)
+(global-set-key (kbd "M-<left>") 'beginning-of-buffer)
+(global-set-key (kbd "M-<right>") 'end-of-buffer)
+
+
+
+
 ;; 优先使用 UTF-8
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
@@ -29,17 +41,15 @@
 ;; 方法1：设置制表符宽度为 8
 (setq-default tab-width 8) ; 制表符显示宽度
 ;; 方法2：缩进宽度设置为 8 tab is spc
-
 ;;(setq-default standard-indent 8)
 (setq-default tab-first-completion 'word-or-paren-or-punct)
-(setq default-directory "~/Documents/github/")
+
 (global-hl-line-mode 1)
 (delete-selection-mode 1)  ; Typing replaces selection
 
 
 
-
-
+(setq default-directory "~/Documents/github/")
 
 
 ;;duplicate
@@ -76,8 +86,6 @@
   "获取颜色值"
   (cdr (assoc name gold-theme-colors)))
 
-;;test                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
 
 
 
@@ -102,8 +110,9 @@
 ;;; ==========================================
 
 ;;; 0. 性能优化
-(setq gc-cons-threshold (* 1024 1024 128)) ; 提高GC阈值
+(setq gc-cons-threshold (* 1024 1024 512)) ; 提高GC阈值
 (setq read-process-output-max (* 1024 1024 32))
+(setq inhibit-compacting-font-caches t)
 (setq byte-compile-warnings nil)
 (setq native-comp-async-report-warnings-errors nil)
 (setq load-prefer-newer t)
@@ -151,6 +160,21 @@
     "#50fa7b"))  ; 绿色
 
 
+
+
+;;显示时间
+;;(display-time-mode t)
+;;设置默认模式
+(setq initial-major-mode 'text-mode)
+
+;;自动刷新
+(global-auto-revert-mode nil)
+;;最近的文件
+;;(recentf-mode nil)
+;;(setq recentf-max-menu-items 25)
+;;(setq recentf-max-saved-items 25)
+;;(global-set-key (kbd "C-x C-r") 'recentf-open-files)
+
 ;;; 7. 基础
 (use-package hl-line
   :hook (after-init . global-hl-line-mode)
@@ -162,7 +186,7 @@
 (use-package isearch
   :ensure nil
   :bind
-  (("C-s" . isearch-forward-regexp)
+  (("C-s" . occur)
    ("C-r" . isearch-backward-regexp)
    ("C-M-s" . isearch-forward)
    ("C-M-r" . isearch-backward)
@@ -201,9 +225,6 @@
             (visual-line-mode -1)))
 
 
-
-
-
 ;;; 10. Tab 和缩进设置
 (setq-default tab-width 8)             ; Tab 宽度为 8
 
@@ -218,12 +239,18 @@
 (global-whitespace-mode 1)             ; 启用全局空白显示
 
 
-;;; 11. Undotree
+;; Undotree~~
 (use-package undo-tree
   :demand t
   :config
   (global-undo-tree-mode t)
-  (setq undo-tree-visualizer-timestamps t)
+
+  ;; 设置 undo-tree/Emacs 原生撤销限制 (单位: 字节)
+(setq undo-limit (* 1024 1024 128))          ;; 128 MB (软限制)
+(setq undo-strong-limit (* 1024 1024 256))  ;; 256 MB (限制，约为 soft 的 1.5 倍)
+(setq undo-outer-limit (* 1024 1024 512))  ;; 512 MB (硬限制，防止单次操作崩溃)
+;; 1. 禁用默认的时间戳显示（减少节点数据量）
+(setq undo-tree-visualizer-timestamps nil)
   (setq undo-tree-visualizer-diff nil);;expensive
   (setq undo-tree-auto-save-history nil)
   (setq undo-tree-visualizer-relative-timestamps t)
@@ -238,7 +265,7 @@
   (("C-x U" . undo-tree-visualize)     ; 可视化 undo
    ("C-x C-u" . undo-tree-undo)            ; 撤销
    ("C-x C-r" . undo-tree-redo)))          ; 重做
-
+;;
 ;;; 12. 文件保存设置
 (setq auto-save-default nil)           ; 禁用自动保存
 (setq make-backup-files nil)           ; 禁用备份文件
@@ -252,6 +279,10 @@
 (setq backup-directory-alist nil)      ; 无备份目录
 (setq backup-by-copying nil)           ; 不复制备份
 (setq vc-make-backup-files nil)        ; 版本控制下不备份
+
+
+
+
 
 ;; 保存时自动删除尾部空格
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
@@ -273,14 +304,14 @@
 
 ;;; 13. Org Mode 配置
 (use-package org
-  :demand t
+   :defer t
   :config
   ;; 基本设置
   (setq org-startup-indented t)        ; 启用缩进
   (setq org-adapt-indentation t)       ; 自适应缩进
   (setq org-src-preserve-indentation t) ; 保留源代码缩进
   (setq org-edit-src-content-indentation 0) ; 源代码内容缩进
-
+  (setq org-startup-folded 'content)
   ;; 代码块设置
   (setq org-src-fontify-natively t)    ; 语法高亮
   (setq org-src-tab-acts-natively t)   ; Tab 键行为
@@ -415,16 +446,16 @@
   :config
 
   ;; 快捷键
-  (define-key lsp-mode-map (kbd "C-c l d") 'lsp-describe-thing-at-point)
-  (define-key lsp-mode-map (kbd "C-c l r") 'lsp-rename)
+  (define-key lsp-mode-map (kbd "C-c  d") 'lsp-describe-thing-at-point)
+  (define-key lsp-mode-map (kbd "C-c  r") 'lsp-rename)
   (define-key lsp-mode-map (kbd "C-c l f") 'lsp-format-buffer)
   (define-key lsp-mode-map (kbd "C-c l a") 'lsp-execute-code-action)
   (define-key lsp-mode-map (kbd "C-c l h") 'lsp-ui-doc-show)
 
   ;; 颜色配置
   (set-face-attribute 'lsp-face-highlight-textual nil
-                      :background (gold-color :aux-purple)
-                      :foreground (gold-color :night-bg))
+                      :background (gold-color :milky-fg)
+                      :foreground (gold-color :night-bg-alt))
   (set-face-attribute 'lsp-face-highlight-read nil
                       :background (gold-color :gold-primary)
                       :foreground (gold-color :night-bg))
@@ -491,7 +522,6 @@
 
 
 
-
 ;; Cape
 (use-package cape
   :demand t
@@ -503,7 +533,8 @@
 
 ;;; 16. 语法检查
 (use-package flycheck
-  :demand t
+  ;;:demand t
+  :defer t
   :hook (after-init . global-flycheck-mode)
   :config
   (setq flycheck-check-syntax-automatically '(save mode-enabled idle-change))
@@ -513,19 +544,26 @@
 ;;; 17. 项目管理
 (use-package projectile
   :init
-  (projectile-mode 1)
+  (projectile-mode t)
   :custom
+  (bookmark-save-flag nil)
+  (projectile-save-buffers-always nil)
   (projectile-completion-system 'default)
   (projectile-switch-project-action 'projectile-dired)
-  (projectile-enable-caching t)
+  (projectile-bookmark-file nil)
+(projectile-enable-caching nil)
+  (projectile-persist-bookmarks nil)
+(project-list-file nil)
+  (projectile-cache-file nil)
   (projectile-indexing-method 'native))
 
 ;;; 18. 搜索
 (use-package consult
   :demand t
   :bind
-  (("C-s" . consult-line)
-   ("C-x b" . consult-buffer)
+  (
+  ( "C-l" . consult-line)
+  ("C-x b" . consult-buffer)
    ("M-g g" . consult-goto-line)
    ("M-y" . consult-yank-pop)))
 
@@ -622,7 +660,6 @@
 ;;; 23. 最终初始化
 (defun final-init ()
   "最终初始化函数"
-  (setq gc-cons-threshold (* 100 1000 1000))
 
   (let ((init-time (float-time (time-subtract (current-time) before-init-time))))
     (message "🚀 Emacs 启动完成，耗时 %.2f 秒" init-time)
@@ -650,7 +687,6 @@
 
 
 ;; 行号设置
-(setq display-line-numbers-type 'relative)  ; 相对行号
 (global-display-line-numbers-mode)         ; 全局启用
 
 ;; 软换行设置
@@ -679,30 +715,10 @@
 
 
 
-;; 代码块边框和背景
-(set-face-attribute 'org-block-begin-line nil
-                    :foreground (gold-color :gold-primary)
-                    :background (gold-color :org-code-bg)
-                    :overline (gold-color :gold-primary)
-                    :underline (gold-color :gold-primary))
-
-(set-face-attribute 'org-block-end-line nil
-                    :foreground (gold-color :gold-primary)
-                    :background (gold-color :org-code-bg)
-                    :overline (gold-color :gold-primary)
-                    :underline (gold-color :gold-primary))
-
-(set-face-attribute 'org-block nil
-                    :background (gold-color :org-code-bg)
-                    :extend t)
-
-(benchmark-run 10
-  (font-lock-fontify-buffer))
-
 
 ;; 延迟字体化
 (setq font-lock-support-mode 'jit-lock-mode)
-(setq jit-lock-defer-time 0.5)  ; 延迟 0.5 秒
+(setq jit-lock-defer-time 0.7)  ; 延迟 0.7 秒
 (setq jit-lock-stealth-time 1)   ; 空闲 1 秒后字体化
 ;; 只字体化可见区域
 (setq font-lock-support-mode 'lazy-lock-mode)
@@ -718,6 +734,7 @@
     (font-lock-fontify-buffer)
     (message "字体化耗时: %.3f 秒"
              (float-time (time-since start-time)))))
+
 
 (defun test-font-lock-performance ()
   "运行一系列性能测试"
@@ -740,21 +757,6 @@
 
 
 
-;; 大文件优化
-(defun my-large-file-hook ()
-  (when (> (buffer-size) 1000000)  ; 1MB 以上
-    ;; 禁用部分高亮
-    (setq font-lock-maximum-decoration 1)
-    ;; 增大延迟
-    (setq jit-lock-defer-time 1.5)
-    ;; 禁用自动换行
-    (setq truncate-lines t)
-    ;; 减少语法检查
-    (setq flycheck-check-syntax-automatically nil)))
-
-(add-hook 'find-file-hook 'my-large-file-hook)
-
-
 
 ;; 根据系统负载动态调整
 (defun dynamic-font-lock-adjust ()
@@ -771,15 +773,14 @@
          (setq jit-lock-defer-time 0.5)
          (setq font-lock-maximum-decoration 2))))
 
-(run-with-idle-timer 10 t 'dynamic-font-lock-adjust)
+(run-with-idle-timer 15 t 'dynamic-font-lock-adjust)
 
 (setq lazy-lock-defer-time 0.2)
-
 (setq lazy-lock-defer-on-the-fly t)
-
 (setq lazy-lock-defer-on-scrolling t)
 
 
+;;m-x list-faces-display to investigate face
 
 
 
@@ -788,30 +789,56 @@
   :hook (prog-mode . indent-guide-mode)
   :config
   (setq indent-guide-char "│")
-  (setq indent-guide-recursive t))
-
-
-
+  (setq indent-guide-recursive t)
 ;; 显示 80 列边界线
 (setq-default display-fill-column-indicator-column 80)
 (global-display-fill-column-indicator-mode 1)
-
-
-
 ;; 在左侧边缘显示竖线
 (setq indicate-empty-lines t)
 (setq indicate-buffer-boundaries 'left)
-
 ;; 显示行号时添加分隔线
-(setq linum-format "%3d │ ")
+(setq linum-format "%3d │ "))
 
+(message "iiss 783")
+
+
+;;;  拼写检查 (Spell-fu)
+(use-package spell-fu
+  :ensure t
+ ;; :demand t
+  :config
+  ;; 设置字典路径
+  (setq spell-fu-directory (expand-file-name "spell-fu-dicts" user-emacs-directory))
+
+  ;; 自动创建字典目录
+  (unless (file-exists-p spell-fu-directory)
+    (make-directory spell-fu-directory t))
+
+  ;; 下载英语字典
+  (unless (file-exists-p (expand-file-name "en" spell-fu-directory))
+    (spell-fu-get-dictionary "en"))
+
+  ;; 基本配置
+  (setq spell-fu-idle-delay 0.5
+        spell-fu-faces-include '(markdown-mode
+                                 org-mode
+                                 text-mode
+                                 prog-mode
+                                 fundamental-mode))
+
+  ;; 颜色配置
+  (set-face-attribute 'spell-fu-incorrect-word nil
+                      :foreground (gold-color :blood-red)
+                      :underline `(:color ,(gold-color :blood-red) :style wave))
+  (set-face-attribute 'spell-fu-flagged-word nil
+                      :foreground (gold-color :warning-orange)
+                      :underline `(:color ,(gold-color :warning-orange) :style wave))
+
+  )
+
+;;occur pre line
 
 
 ( toggle-frame-fullscreen)
-
-
-
-
-
 
 (message "sir only you sir")
