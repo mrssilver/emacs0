@@ -91,7 +91,7 @@
    `(header-line ((,class (:inherit mode-line))))
 
    `(minibuffer-prompt ((,class (:foreground ,gold-primary :weight bold))))
-   `(link ((,class (:foreground ,cyan :underline t))))
+   `(link ((,class (:foreground ,milky-fg-alt :underline t))))
    `(link-visited ((,class (:foreground ,pink :underline t))))
    `(button ((,class (:foreground ,cyan :underline t))))
    `(widget-field ((,class (:background ,gray-light))))
